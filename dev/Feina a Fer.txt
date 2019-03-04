@@ -1,0 +1,34 @@
+
+
+Feina a Fer
+
+----------------------------------------------------
+
+Goma d'esborrar
+
+Guardar
+saveLab
+
+Path:
+Tirar endarrere
+Trencar la la paret de path[0]
+
+Ctrl + Z:
+actionStack
+
+Zoom
+
+Nova eina Select (icona Cursor)
+Seleccionar rectangle:
+	- Select + Mouse = Moure Selecció
+	- Goma + Select = Esborrar selecció
+	- Llapis + Select = Marc??
+
+----------------------------------------------------
+
+GitHub
+
+Diagrames
+
+Control d'idioma
+

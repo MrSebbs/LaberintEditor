@@ -1,0 +1,27 @@
+webs de referencia:
+
+svg editor:
+https://editor.method.ac/
+
+portfolio:
+https://codepen.io/freeCodeCamp/pen/zNBOYG
+
+menus:
+file:///C:/Users/Mart%C3%AD/Desktop/Idees,%20Projectes/HtmlPositioning/schemes.html
+
+entities:
+▴ ▾ ◂ ▸ (blacktriangle, blacktriangledown); &#9662;
+▴ ▾ ◂ ▸ (utrif, dtrif);
+https://www.w3schools.com/charsets/ref_html_entities_b.asp
+
+
+CSS positioning:
+https://internetingishard.com/html-and-css/advanced-positioning/
+
+UML Diagrams:
+https://creately.com/blog/diagrams/class-diagram-relationships/
+
+
+Mixting colors:
+https://stackoverflow.com/questions/14819058/mixing-two-colors-naturally-in-javascript
+https://stackoverflow.com/questions/1892020/mixing-two-rgb-color-vectors-to-get-resultant

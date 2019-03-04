@@ -1,0 +1,30 @@
+Javi Agenjo:
+
+variable global
+var editor (porta del darrere)
+
+
+separacio model - view - controller
+
+
+Afegir index a HTMLElement:
+celes
+tools
+Seria millor fer-ho afegint un ID?
+
+
+toolbar:
+canvi de class: currentTool
+action (massa rebuscat?)
+
+
+Ctrl + Z:
+Com ho faig? Guardo tot el Laberint?
+
+
+delete
+He d'eliminar les variables després de fer-les servir?
+
+
+testing
+Mètode de tests per no espatallar coses que abans funcionaven

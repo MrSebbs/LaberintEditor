@@ -1,0 +1,39 @@
+Brainstorming
+
+Menú:
+Indica el numero de claus, cofres i temps récord.
+Opció que obri l'inventari.
+
+Objectes:
+Claus d'or per obrir portes
+Claus de plata per obrir cofres
+Capdell de llana per saber per on has anat
+Rètol per marcar camins sense sortida
+Monedes per comprar objectes millors
+La botiga pot estar incorporada dins del laberint
+(escales per accedir a la botiga en diversos punts de fàcil accés)
+
+Pic que pugui enderrocar 5 parets abans de trencar-se
+Botons que permetin moure parets
+Diversos botons que s'hagin de prémer en l'ordre correcte per obrir una paret
+
+Minijoc:
+Passar-se un minilaberint en 30 segons
+Mini pacman durant 30 segons
+En superar el minijoc pots escollir 1/3 cofres i quedar-te la recompensa
+
+
+Impediments:
+Forat que t'obligui a retrocedir fins la casella d'entrada
+Monstre que vigili el laberint i que si et troba se't menja (perds objectes i tornes al principi)
+Espasa que serveixi per matar el monstre (guanyes monedes? un cofre?)
+Tros de carn per entretenir el monstre
+
+
+Visibilitat:
+Espai reduït que es pot ampliar amb una torxa
+Petits quadrats i pots passar al quadrat següent
+
+Ulleres VR per veure el laberint en 3 dimensions
+Diverses opcions de control de l'avatar
+Monstre: límit de temps. Només el sents, cada vegada més fort. Súper Creepy.
