@@ -534,7 +534,7 @@ class Model{
 			case 1: cela[index + 1].wall[3] = null; break;
 			case 2:
 				var cela2 = cela[index + c]
-				console.log(cela2);
+				// console.log(cela2);
 				cela[index + c].wall[0] = null;
 				break;
 			case 3: cela[index - 1].wall[1] = null; break;
@@ -721,6 +721,26 @@ class Controller{
 		};
 		reader.onload = reader.onload.bind(this);
 	}
+
+	saveLab(){
+		var str_result = "";
+		var q = this.model.quadricula;
+		var cela = q.cela;
+
+		str_result += "#Celes: "+q.numCeles +"\n";
+		str_result += "#Columnes: "+q.columnes+"\n"; 
+		str_result += "#Files: "+q.files+"\n\n";
+		for(var i=0; i<q.numCeles; i++){
+			str_result += "#"+i+": ";
+			for(var s=0; s<4; s++){
+				if (cela[i].wall[s]) str_result +=  "1";
+				else str_result +=  "0";
+			}
+			str_result += "\n";
+		}
+		console.log(str_result);
+	}
+
 
 }
 

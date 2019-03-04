@@ -4,13 +4,14 @@ Feina a Fer
 
 ----------------------------------------------------
 
-Goma d'esborrar
+erasePathWalls:
+Esborrar totes les parets si path.length = 1
 
 Guardar
-saveLab
+saveLab 
 
 Path:
-Tirar endarrere
+Tirar endarrere (girar 180 graus)
 Trencar la la paret de path[0]
 
 Ctrl + Z:
@@ -25,8 +26,6 @@ Seleccionar rectangle:
 	- Llapis + Select = Marc??
 
 ----------------------------------------------------
-
-GitHub
 
 Diagrames
 
