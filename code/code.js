@@ -126,8 +126,8 @@ class Cela {
 
 class Quadricula {
 	constructor(columnes, files){
-		this.columnes = columnes;
-		this.files = files;
+		this.columnes = parseInt(columnes);
+		this.files = parseInt(files);
 		this.numCeles = columnes * files;
 		this.cela = [];
 		this.wall = [];
@@ -525,6 +525,34 @@ class Model{
 		}
 	}
 
+	destroyWall(index, side){
+		var cela = this.quadricula.cela;
+		var c = this.quadricula.columnes;
+		cela[index].wall[side] = null;
+		switch(side){
+			case 0: cela[index - c].wall[2] = null; break;
+			case 1: cela[index + 1].wall[3] = null; break;
+			case 2:
+				var cela2 = cela[index + c]
+				console.log(cela2);
+				cela[index + c].wall[0] = null;
+				break;
+			case 3: cela[index - 1].wall[1] = null; break;
+		}
+	}
+
+	erasePathWalls(path){
+		var directionPath = this.computeDirectionPath(path);
+		var index;
+		var side;
+
+		for(var i=0; i<path.length - 1; i++){
+			index = path[i];
+			side = directionPath[i];
+			this.destroyWall(index, side);
+		}
+	}
+
 }
 
 
@@ -563,7 +591,8 @@ class Controller{
 		}
 
 		this.actionFunctions.erasePathWalls = function(path){
-			console.log("erasePathWalls function");
+			this.model.erasePathWalls(path);
+			this.view.draw(this.model);
 		}
 
 		this.actionFunctions.createBridge = function(){
