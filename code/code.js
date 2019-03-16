@@ -555,7 +555,6 @@ class Model{
 
 }
 
-
 class Controller{
 	constructor(){
 		this.model = new Model();
@@ -563,12 +562,14 @@ class Controller{
 
 		this.ready_menu.call(this);
 
+		/* AIXO NO VA AQUI */
 		this.actionFunctions = {
 			createPathWalls : null,
 			erasePathWalls : null,
 			createBridge : null
 		};
 		this.define_actionFunctions();
+		/**/
 
 		this.toolbar_left = new Toolbar("tools_left");
 		this.ready_toolbar_left();
@@ -740,7 +741,6 @@ class Controller{
 		}
 		console.log(str_result);
 	}
-
 
 }
 

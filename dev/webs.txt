@@ -25,3 +25,7 @@ https://creately.com/blog/diagrams/class-diagram-relationships/
 Mixting colors:
 https://stackoverflow.com/questions/14819058/mixing-two-colors-naturally-in-javascript
 https://stackoverflow.com/questions/1892020/mixing-two-rgb-color-vectors-to-get-resultant
+
+
+diagrames
+https://www.draw.io/

@@ -1,7 +1,18 @@
 
+FEINA A FER
 
-Feina a Fer
 
+----------------------------------------------------
+PRIORITATS
+----------------------------------------------------
+
+1. Zoom
+
+2. Guardar
+
+
+----------------------------------------------------
+NOVES EINES
 ----------------------------------------------------
 
 erasePathWalls:
@@ -25,9 +36,39 @@ Seleccionar rectangle:
 	- Goma + Select = Esborrar selecció
 	- Llapis + Select = Marc??
 
+
+
+----------------------------------------------------
+ARREGLAR EINES EXISTENTS
+----------------------------------------------------
+
+El zoom hauria de modificar només el View
+Si desde el Controller llanço un efecte de fadeout, això no hauria d'afectar al Model
+
+/* INTRODUIR */
+this.action = [];
+defineActions();
+if(event){
+	call(this.action[current_tool.index])
+}
+/**/
+
+Preparar ActionStack i Ctrl+Z
+
+Afegir Comprovacions a mouseIsDown
+
+Netejar la pantalla periodicament (hi ha una manera millor?)
+
+loadLab No només onChange
+
+this.view.updateCurrentTool() ->
+this.updateCurrentTool() ??
+
+
+----------------------------------------------------
+ALTRES
 ----------------------------------------------------
 
 Diagrames
 
 Control d'idioma
-

@@ -28,3 +28,7 @@ He d'eliminar les variables després de fer-les servir?
 
 testing
 Mètode de tests per no espatallar coses que abans funcionaven
+
+
+linode
+Servidors. Donar-hi un cop d'ull
