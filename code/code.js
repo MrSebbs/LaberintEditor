@@ -163,6 +163,9 @@ class View{
 			'side_length': 50,
 			'margin': 10,
 			'wall_stroke': 3,
+			'original_side_length': 50,
+			'original_margin': 10,
+			'original_wall_stroke': 3,
 			'wallFillColor': "#333",
 
 			'defaultColor': '#fff', 		//'rgb (255, 255, 255)',
@@ -180,6 +183,7 @@ class View{
 	ready_modals(){
 		this.bindModal("modal_newLab", "option_newLab");
 		this.bindModal("modal_loadLab", "option_loadLab");
+		this.bindModal("modal_zoom", "option_zoom");
 	}
 
 	displayOff(id){
@@ -581,8 +585,32 @@ class Controller{
 	ready_menu(){
 		document.getElementById("newLab").addEventListener('submit', this.newLab.bind(this), false);
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
+		this.ready_zoomEvents.call(this);
 		//TODO
 		//loadLab No nomes onchange
+	}
+
+	ready_zoomEvents(){
+		var zoomRange = document.getElementById("zoom_range");
+		var zoomNumber = document.getElementById("zoom_number");
+
+		zoomRange.addEventListener('input', function(event){
+			zoomNumber.value = this.value;
+		}, false);
+
+		zoomNumber.addEventListener('change', function(event){
+			zoomRange.value = this.value;
+		}, false);
+
+		var zoomEnquadraValues = function(){
+			zoomRange.value = 100;
+			zoomNumber.value = 100;
+			this.zoom.call(this);
+		}
+
+		document.getElementById("zoom_enquadra").addEventListener('click', zoomEnquadraValues.bind(this), false);
+		document.getElementById("zoom").addEventListener('submit', this.zoom.bind(this), false);
+
 	}
 
 	define_actionFunctions(){
@@ -742,6 +770,23 @@ class Controller{
 		console.log(str_result);
 	}
 
+	zoom(event){
+		this.view.displayOff("modal_zoom");			//Hi ha una altra manera d'amagar el modal?	
+		var percent, cell, wall;	
+		if(event.target.id == "zoom_enquadra"){
+			console.log("Enquadra");
+		}else if(event.target.id == "zoom"){
+			console.log("Zoom: " + event.target[0].value);
+			percent = event.target[0].value/100;
+			
+			var pp = this.view.properties;
+			pp.side_length = pp.original_side_length * percent;
+			pp.margin = pp.original_margin * percent;
+			pp.wall_stroke = pp.original_wall_stroke * percent;
+
+			this.view.ready_drawArea(this.model.quadricula);
+		}
+	}
 }
 
 window.onload = function(){

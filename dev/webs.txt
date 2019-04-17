@@ -29,3 +29,6 @@ https://stackoverflow.com/questions/1892020/mixing-two-rgb-color-vectors-to-get-
 
 diagrames
 https://www.draw.io/
+
+Input Range Style:
+https://www.cssportal.com/style-input-range/

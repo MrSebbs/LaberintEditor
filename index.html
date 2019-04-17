@@ -29,7 +29,7 @@
 			</li>
 			<li class="dropdown"><span>Visualització</span>
 				<ul>
-					<li><a href='#'>Zoom</a></li>
+					<li id="option_zoom"><a href='#'>Zoom</a></li>
 				</ul>
 			</li>
 			<li><span>Qui Som</span></li>
@@ -58,6 +58,22 @@
 				</br>
 				<!-- <input id="loadLab" type="file" name="files" multiple="" onchange="editor.loadLab(); return false"> -->
 				<input id="loadLab" type="file" name="files" multiple="">
+			</form>
+		</div>
+	</div>
+
+	<div id="modal_zoom" class="modal">
+		<div class="modal_content">
+			<span class="modal_close">&times;</span>
+			<form id="zoom" onsubmit="return false">
+				<h3>Introdueix el zoom</h3>
+				</br>
+				<p><input id="zoom_range" type="range" min="10" max="100" value="100">
+				<input id="zoom_number" type="number" min="10" max="100" value="100"></p>
+				</br>
+				<!-- <p><input type="button" value="Enquadra"></p> -->
+				<input class="modal_submit" type="submit">
+				<input id="zoom_enquadra" class="modal_submit" type="button" value="Enquadra">
 			</form>
 		</div>
 	</div>
