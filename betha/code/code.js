@@ -103,9 +103,7 @@ class Wall {
 	constructor(cela, side){
 		this.cela = cela;
 		this.side = side;
-
 		this.cela.wall[side] = this;
-		this.code_html;
 	}
 }
 
@@ -177,6 +175,8 @@ class View{
 
 		};
 
+		this.walls_html = [];
+
 		this.ready_modals();
 	}
 
@@ -245,6 +245,9 @@ class View{
 			cela.element_html = this.DOM_quadricula.children[i];
 			this.setDefaultCellStyle(cela, pp);
 		}
+
+		this.resetWalls();
+
 	}
 
 	setDefaultCellStyle(cela, pp){
@@ -260,7 +263,7 @@ class View{
 	}
 
 	setPathColor(model, index){
-		model.quadricula.cela[index].element_html.style.fill = model.view.properties.pathColor;
+		model.quadricula.cela[index].element_html.style.fill = this.properties.pathColor;
 	}
 
 	fadeOutColor(model, path){
@@ -275,7 +278,7 @@ class View{
 		}
 
 		var startColor = new Color3(cellPath[0].element_html.style.fill);	//Aixo hauria de venir de view.properties
-		var targetColor = new Color3(model.view.properties.defaultColor);
+		var targetColor = new Color3(this.properties.defaultColor);
 		var colorVector = targetColor.subtract(startColor);
 
 		var interval;
@@ -304,8 +307,8 @@ class View{
 		setTimeout(fadeOutEnd, tmax);
 	}
 
-	setWallCodeHtml(model, wall){
-		var pp = model.view.properties;
+	getWallCodeHtml(model, wall){
+		var pp = this.properties;
 		var cela = wall.cela;
 
 		var x = cela.x * pp.side_length + pp.margin - pp.wall_stroke;
@@ -326,7 +329,7 @@ class View{
 			case 3: break;
 		}
 
-		wall.code_html = "<rect width=\""+ width +
+		return "<rect width=\""+ width +
 			"\" height=\""+ height +
 			"\" fill=\""+ this.properties.wallFillColor +
 			"\" x=\""+ x +"\" y=\""+ y +"\"></rect>";
@@ -353,30 +356,57 @@ class View{
 	}
 
 	draw(model){
-		var code_html = "";		//Omplir les dades que passarem a innerHTML
+		var wall, code_html = "";		//Omplir les dades que passarem a innerHTML
 		var cela = model.quadricula.cela;
 
+		var count = 0;
+
+		if (this.walls_html.length == 0)
+			for(var i=0; i<cela.length; i++)
+				for(var s=0; s<4; s++)
+					this.walls_html.push("");
+
 		for(var i=0; i<cela.length; i++){
-			for(var side=0; side<4; side++){
-				var wall = cela[i].wall[side];
-				if(wall) code_html += wall.code_html;
+			for(var s=0; s<4; s++){
+
+				wall = cela[i].wall[s];
+				if(wall == null){
+					this.walls_html[4*i + s] = "";
+					continue;
+				}
+
+				if(this.walls_html[4*i + s] == ""){
+					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
+					count++;
+				}
+
+				code_html += this.walls_html[4*i + s];
 			}
 		}
-		this.DOM_walls.innerHTML = code_html;	// Aqui hi ha l'error
+		this.DOM_walls.innerHTML = code_html;
+		console.log(count);
+	}
+
+	resetWalls(){
+		this.walls_html = []
 	}
 
 }
 
 class Model{
 	constructor(){
-		this.view = new View();
 		this.quadricula;
 	}
 
-	/* WALL UTIL */
-	addWall(cela, side){
-		var wall = new Wall (cela, side);
-		this.view.setWallCodeHtml(this, wall);
+	getWalls(){
+		var wall, walls = [];
+		for(var i=0; i<this.quadricula.cela.length; i++){
+			for(var s=0; s<4; s++){
+				wall = this.quadricula.cela[i].wall[s];
+				if(wall) walls.push(wall);
+			}
+		}
+		return walls;
 	}
 
 	removeWall(cela, side){
@@ -393,41 +423,32 @@ class Model{
 		for (var i=0; i<columnes; i++){
 			cela = quadricula.getCela(i, 0);
 			side = 0;	//top
-			this.addWall(cela, side);
+			new Wall(cela, side);
 		}
 
 		// right: side 1, index: (columnes-1, i)
 		for (var i=0; i<files; i++){
 			cela = quadricula.getCela(columnes-1, i);
 			side = 1;	//right
-			this.addWall(cela, side);
+			new Wall(cela, side);
 		}
 
 		// bottom: side 2, index: (i, files-1)
 		for (var i=0; i<columnes; i++){
 			cela = quadricula.getCela(i, files-1);
 			side = 2;	//bottom
-			this.addWall(cela, side);
+			new Wall(cela, side);
 		}
 
 		// left: side 3, index: (0, i)
 		for (var i=0; i<files; i++){
 			cela = quadricula.getCela(0, i);
 			side = 3;	//left
-			this.addWall(cela, side);
+			new Wall(cela, side);
 		}
 	}
 
 	/* MENU EVENTS */
-	newLab(columnes, files){
-		this.quadricula = new Quadricula(columnes, files);
-		this.loadBorders();
-		this.view.ready_drawArea(this.quadricula);
-		// this.view.ready_walls(this.quadricula);
-		// this.quadricula.updateWalls();
-		this.view.draw(this);
-	}
-
 	loadLab(data){
 		if(!data.header){
 			console.log("No es pot llegir el fitxer");
@@ -444,16 +465,9 @@ class Model{
 		var wall = data.wall;
 		for(var i=0; i<wall.length; i++){
 			for(var side=0; side<4; side++){
-				if(wall[i][side] == 1) this.addWall(cela[i], side);
-				// cela[i].wall[side] = new Wall(i, side);
+				if(wall[i][side] == 1) new Wall(cela[i], side);
 			}
 		}
-
-		this.view.ready_drawArea(this.quadricula);
-		
-		this.view.draw(this);
-		
-		// this.view.ready_walls(this.quadricula);
 	}
 
 
@@ -497,11 +511,11 @@ class Model{
 			if(directionChange[i] == 0){
 				//Parets Paraleles
 				if(directionPath[i] % 2 == 0){
-					this.addWall(cela, 1);
-					this.addWall(cela, 3);
+					new Wall(cela, 1);
+					new Wall(cela, 3);
 				}else if(directionPath[i] % 2 == 1){
-					this.addWall(cela, 0);
-					this.addWall(cela, 2);
+					new Wall(cela, 0);
+					new Wall(cela, 2);
 				}
 			}else if(directionChange[i] % 2 != 0){
 				var p = directionPath[i-1];
@@ -511,8 +525,8 @@ class Model{
 				if(corner[1] < 0) corner[1] += 4;
 				else if (corner[1] > 3) corner[1] -= 4;
 
-				this.addWall(cela, corner[0]);
-				this.addWall(cela, corner[1]);
+				new Wall(cela, corner[0]);
+				new Wall(cela, corner[1]);
 			}
 		}
 		// ultim element
@@ -521,7 +535,7 @@ class Model{
 		for(var i=0; i<4; i++){
 			var dif = directionPath[directionPath.length - 1] - i;
 			if(dif % 2 != 0){
-				this.addWall(cela, i);
+				new Wall(cela, i);
 			}
 		}
 	}
@@ -559,7 +573,7 @@ class Model{
 class Controller{
 	constructor(){
 		this.model = new Model();
-		this.view = this.model.view;
+		this.view = new View();
 
 		this.ready_menu.call(this);
 
@@ -702,9 +716,17 @@ class Controller{
 
 	newLab(event){
 		this.view.displayOff("modal_newLab");
-		var width = event.target[0].value;
-		var height = event.target[1].value;
-		this.model.newLab(parseInt(width), parseInt(height));
+
+		var width = parseInt(event.target[0].value);
+		var height = parseInt(event.target[1].value);
+		
+		var model = this.model;
+		model.quadricula = new Quadricula(width, height);
+		model.loadBorders();
+
+		this.view.ready_drawArea(model.quadricula);
+		this.view.draw(model);
+
 		this.ready_cell_events.call(this);
 	}
 
@@ -744,6 +766,10 @@ class Controller{
 			}
 
 			this.model.loadLab(data);
+
+			this.view.ready_drawArea(this.model.quadricula);
+			this.view.draw(this.model);
+
 			this.ready_cell_events.call(this);
 
 		};
@@ -793,24 +819,8 @@ class Controller{
 			pp.wall_stroke = pp.original_wall_stroke * percent;
 
 			this.view.ready_drawArea(this.model.quadricula);
-
-			var getWalls = [];
-
-			var cela = this.model.quadricula.cela
-			var wall = null;
-			for(var i=0; i<=cela.length; i++){
-				for(var s=0; s<4; s++){
-					wall = cela[i].wall[s];
-					if(wall) getWalls.push(wall);
-				}
-			}
-
-			console.log(getWalls);
-
-			// this.model.quadricula.wall
-			// this.view.setWallCodeHtml(this.model, wall)
-
-			// this.view.draw(this.model);
+			this.view.draw(this.model);
+			this.ready_cell_events.call(this);
 		}
 	}
 
@@ -819,4 +829,3 @@ class Controller{
 window.onload = function(){
 	editor = new Controller();
 };
-
