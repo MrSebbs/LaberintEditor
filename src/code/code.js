@@ -772,6 +772,7 @@ class Controller{
 
 			this.ready_cell_events.call(this);
 
+			event.target.value = "";
 		};
 		reader.onload = reader.onload.bind(this);
 	}
