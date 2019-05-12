@@ -103,7 +103,9 @@ class Wall {
 	constructor(cela, side){
 		this.cela = cela;
 		this.side = side;
+
 		this.cela.wall[side] = this;
+		// this.code_html;
 	}
 }
 

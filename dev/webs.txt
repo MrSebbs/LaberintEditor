@@ -32,3 +32,32 @@ https://www.draw.io/
 
 Input Range Style:
 https://www.cssportal.com/style-input-range/
+
+
+
+
+/* Sobre Javascript */
+
+The Right Way
+http://jstherightway.org/es-es/
+
+Bones pràctiques js:
+https://github.com/rwaldron/idiomatic.js/tree/master/translations/es_ES
+
+Referència js:
+https://developer.mozilla.org/es/docs/Web/JavaScript
+
+Detectar errors js:
+https://jshint.com/
+/* jshint esversion: 6 */
+/* jshint expr: true */
+
+Video:
+Arindam Paul - JavaScript VM internals, EventLoop, Async and ScopeChains
+https://www.youtube.com/watch?v=QyUFheng6J0
+
+
+
+
+Fitxers?? gulpfiles
+https://gulpjs.com/

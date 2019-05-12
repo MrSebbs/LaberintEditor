@@ -17,7 +17,7 @@ class Color3 {
 				rgb.push(parseInt(str[3]+str[3], 16));
 			}
 		}else if(arguments.length == 3){
-			rgb = [arguments[0], arguments[1], arguments[2]]
+			rgb = [arguments[0], arguments[1], arguments[2]];
 		}
 
 		this.red = parseInt(rgb[0]);
@@ -195,18 +195,18 @@ class View{
 		modal.onclick = function(event) {
 			if (event.target == this)
 				this.style.display = "none";
-		}
+		};
 
 		var menuOption = document.getElementById(menuOptionId);
 		menuOption.onclick = function(){
 			this.style.display = "block";
-		}
+		};
 		menuOption.onclick = menuOption.onclick.bind(modal);
 
 		var span = modal.firstElementChild.firstElementChild;
 		span.onclick = function() {
 			this.style.display = "none";
-		}
+		};
 		span.onclick = span.onclick.bind(modal);
 	}
 
@@ -222,7 +222,7 @@ class View{
 		this.DOM_quadricula = this.DOM_drawArea.children[0];
 		this.DOM_walls = this.DOM_drawArea.children[1];
 
-		pp.width = quadricula.columnes * pp.side_length + 2 * pp.margin;;
+		pp.width = quadricula.columnes * pp.side_length + 2 * pp.margin;
 		pp.height = quadricula.files * pp.side_length + 2 * pp.margin;
 
 		this.DOM_drawArea.width.baseVal.value = pp.width;
@@ -281,7 +281,7 @@ class View{
 		var interval;
 		var fadeOutEnd = function(){
 			clearInterval(interval);
-		}
+		};
 
 		var fadeOutStep = function(){
 			var elapsedTime = Date.now() - startTime;
@@ -298,7 +298,7 @@ class View{
 					cellPath[i].element_html.style.fill = color;
 				}
 			}
-		}
+		};
 
 		interval = setInterval(fadeOutStep, 1000/fps);
 		setTimeout(fadeOutEnd, tmax);
@@ -313,9 +313,6 @@ class View{
 		var width = pp.side_length + 2 * pp.wall_stroke;
 		var height = 2 * pp.wall_stroke;
 
-		// var fillColor = "#333";
-		// Aixo ho hem de posar a quadricula.properties
-
 		if(wall.side%2 != 0){
 			var aux = width;
 			width = height;
@@ -329,10 +326,10 @@ class View{
 			case 3: break;
 		}
 
-		wall.code_html = "<rect width=\""+width
-			+"\" height=\""+height
-			+"\" fill=\""+this.properties.wallFillColor
-			+"\" x=\""+x+"\" y=\""+y+"\"></rect>";
+		wall.code_html = "<rect width=\""+ width +
+			"\" height=\""+ height +
+			"\" fill=\""+ this.properties.wallFillColor +
+			"\" x=\""+ x +"\" y=\""+ y +"\"></rect>";
 	}
 
 	ready_toolbar(toolbar){
@@ -365,7 +362,7 @@ class View{
 				if(wall) code_html += wall.code_html;
 			}
 		}
-		this.DOM_walls.innerHTML = code_html;
+		this.DOM_walls.innerHTML = code_html;	// Aqui hi ha l'error
 	}
 
 }
@@ -378,12 +375,12 @@ class Model{
 
 	/* WALL UTIL */
 	addWall(cela, side){
-		var wall = new Wall (cela, side)
+		var wall = new Wall (cela, side);
 		this.view.setWallCodeHtml(this, wall);
 	}
 
 	removeWall(cela, side){
-		cela.wall[side] = null
+		cela.wall[side] = null;
 	}
 
 	loadBorders(){
@@ -500,11 +497,11 @@ class Model{
 			if(directionChange[i] == 0){
 				//Parets Paraleles
 				if(directionPath[i] % 2 == 0){
-					this.addWall(cela, 1)
-					this.addWall(cela, 3)
+					this.addWall(cela, 1);
+					this.addWall(cela, 3);
 				}else if(directionPath[i] % 2 == 1){
-					this.addWall(cela, 0)
-					this.addWall(cela, 2)
+					this.addWall(cela, 0);
+					this.addWall(cela, 2);
 				}
 			}else if(directionChange[i] % 2 != 0){
 				var p = directionPath[i-1];
@@ -514,8 +511,8 @@ class Model{
 				if(corner[1] < 0) corner[1] += 4;
 				else if (corner[1] > 3) corner[1] -= 4;
 
-				this.addWall(cela, corner[0])
-				this.addWall(cela, corner[1])
+				this.addWall(cela, corner[0]);
+				this.addWall(cela, corner[1]);
 			}
 		}
 		// ultim element
@@ -524,7 +521,7 @@ class Model{
 		for(var i=0; i<4; i++){
 			var dif = directionPath[directionPath.length - 1] - i;
 			if(dif % 2 != 0){
-				this.addWall(cela, i)
+				this.addWall(cela, i);
 			}
 		}
 	}
@@ -537,7 +534,7 @@ class Model{
 			case 0: cela[index - c].wall[2] = null; break;
 			case 1: cela[index + 1].wall[3] = null; break;
 			case 2:
-				var cela2 = cela[index + c]
+				var cela2 = cela[index + c];
 				// console.log(cela2);
 				cela[index + c].wall[0] = null;
 				break;
@@ -585,6 +582,8 @@ class Controller{
 	ready_menu(){
 		document.getElementById("newLab").addEventListener('submit', this.newLab.bind(this), false);
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
+		document.getElementById("option_saveLab").addEventListener('click', this.saveLab.bind(this), false);
+
 		this.ready_zoomEvents.call(this);
 		//TODO
 		//loadLab No nomes onchange
@@ -606,7 +605,7 @@ class Controller{
 			zoomRange.value = 100;
 			zoomNumber.value = 100;
 			this.zoom.call(this);
-		}
+		};
 
 		document.getElementById("zoom_enquadra").addEventListener('click', zoomEnquadraValues.bind(this), false);
 		document.getElementById("zoom").addEventListener('submit', this.zoom.bind(this), false);
@@ -617,16 +616,16 @@ class Controller{
 		this.actionFunctions.createPathWalls = function(path){
 			this.model.createPathWalls(path);
 			this.view.draw(this.model);
-		}
+		};
 
 		this.actionFunctions.erasePathWalls = function(path){
 			this.model.erasePathWalls(path);
 			this.view.draw(this.model);
-		}
+		};
 
 		this.actionFunctions.createBridge = function(){
 			console.log("createBridge is not implemented yet");
-		}
+		};
 	}
 
 	ready_toolbar_left(){
@@ -664,7 +663,7 @@ class Controller{
 		// actionStack s'ha de transformar competament
 		var path = [];
 		path.push(event.target.index);
-		this.actionStack.push(path)
+		this.actionStack.push(path);
 	}
 
 	cellMouseenterEvent(event){
@@ -702,7 +701,7 @@ class Controller{
 	}
 
 	newLab(event){
-		this.view.displayOff("modal_newLab");			//Hi ha una altra manera d'amagar el modal?
+		this.view.displayOff("modal_newLab");
 		var width = event.target[0].value;
 		var height = event.target[1].value;
 		this.model.newLab(parseInt(width), parseInt(height));
@@ -710,7 +709,7 @@ class Controller{
 	}
 
 	loadLab(event){
-		this.view.displayOff("modal_loadLab");			//Hi ha una altra manera d'amagar el modal?
+		this.view.displayOff("modal_loadLab");
 		var files = event.target.files;
 		if (!files[0]) {
 			console.log("no hi ha cap fitxer");
@@ -752,26 +751,35 @@ class Controller{
 	}
 
 	saveLab(){
-		var str_result = "";
+		var text = "";
 		var q = this.model.quadricula;
 		var cela = q.cela;
 
-		str_result += "#Celes: "+q.numCeles +"\n";
-		str_result += "#Columnes: "+q.columnes+"\n"; 
-		str_result += "#Files: "+q.files+"\n\n";
+		text += "#Celes: "+q.numCeles +"\n";
+		text += "#Columnes: "+q.columnes+"\n"; 
+		text += "#Files: "+q.files+"\n\n";
 		for(var i=0; i<q.numCeles; i++){
-			str_result += "#"+i+": ";
+			text += "#"+i+": ";
 			for(var s=0; s<4; s++){
-				if (cela[i].wall[s]) str_result +=  "1";
-				else str_result +=  "0";
+				if (cela[i].wall[s]) text +=  "1";
+				else text +=  "0";
 			}
-			str_result += "\n";
+			text += "\n";
 		}
-		console.log(str_result);
+		// console.log(text);
+
+		var filename = "Lab_"+ q.columnes +"x"+ q.files +".txt";
+		var element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain; charset=utf-8,' + encodeURIComponent(text));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
 	}
 
 	zoom(event){
-		this.view.displayOff("modal_zoom");			//Hi ha una altra manera d'amagar el modal?	
+		this.view.displayOff("modal_zoom");
 		var percent, cell, wall;	
 		if(event.target.id == "zoom_enquadra"){
 			console.log("Enquadra");
@@ -785,10 +793,30 @@ class Controller{
 			pp.wall_stroke = pp.original_wall_stroke * percent;
 
 			this.view.ready_drawArea(this.model.quadricula);
+
+			var getWalls = [];
+
+			var cela = this.model.quadricula.cela
+			var wall = null;
+			for(var i=0; i<=cela.length; i++){
+				for(var s=0; s<4; s++){
+					wall = cela[i].wall[s];
+					if(wall) getWalls.push(wall);
+				}
+			}
+
+			console.log(getWalls);
+
+			// this.model.quadricula.wall
+			// this.view.setWallCodeHtml(this.model, wall)
+
+			// this.view.draw(this.model);
 		}
 	}
+
 }
 
 window.onload = function(){
 	editor = new Controller();
-}
+};
+
