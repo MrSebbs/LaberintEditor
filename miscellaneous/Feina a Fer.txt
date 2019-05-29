@@ -29,7 +29,8 @@ Trencar la la paret de path[0]
 
 
 Ctrl + Z:
-actionStack
+new actionStack
+class dins de controller
 
 
 Actualitzar Laberint (F5)
@@ -68,6 +69,12 @@ this.updateCurrentTool() ??
 
 
 paths de longitud 2 que s'entrecreuen malament
+
+
+Format JSON per guardar Lab
+Model: 20x20 = 400 celes 
+View: 20+20 = 40 arrays
+[0, 4, 7, 9, 15, 20] = 0-4 paret + 7-9 paret + 15-20 paret
 
 
 ----------------------------------------------------

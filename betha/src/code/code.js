@@ -626,6 +626,8 @@ class Controller{
 
 	}
 
+
+	/* DESAPAREIX */
 	define_actionFunctions(){
 		this.actionFunctions.createPathWalls = function(path){
 			this.model.createPathWalls(path);
@@ -641,6 +643,8 @@ class Controller{
 			console.log("createBridge is not implemented yet");
 		};
 	}
+	/* DESAPAREIX */
+
 
 	ready_toolbar_left(){
 		var toolElement = this.toolbar_left.element_html.firstElementChild.children;
@@ -694,7 +698,21 @@ class Controller{
 	
 		// actionStack s'ha de transformar competament
 		var path = this.actionStack[this.actionStack.length-1];
-		this.toolbar_left.currentTool.action(path);
+		var tool = this.toolbar_left.currentTool;
+
+		// this.toolbar_left.currentTool.action(path);
+
+		if(tool.name == "llapis"){
+			this.model.createPathWalls(path);
+			this.view.draw(this.model);
+		}
+		else if(tool.name == "goma"){
+			this.model.erasePathWalls(path);
+			this.view.draw(this.model);
+		}
+		else if(tool.name == "pont"){
+			console.log("createBridge is not implemented yet");
+		}
 
 		this.view.fadeOutColor(this.model, path);
 	}
