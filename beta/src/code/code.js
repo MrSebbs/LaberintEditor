@@ -62,8 +62,6 @@ class Tool {
 	constructor(element, name, actionFunction){
 		this.element_html = element;
 		this.name = name;
-		this.action = actionFunction;
-
 		this.element_html.title = name;
 	}
 }
@@ -180,6 +178,7 @@ class View{
 		this.ready_modals();
 	}
 
+	/* MODALS */
 	ready_modals(){
 		this.bindModal("modal_newLab", "option_newLab");
 		this.bindModal("modal_loadLab", "option_loadLab");
@@ -210,6 +209,28 @@ class View{
 		span.onclick = span.onclick.bind(modal);
 	}
 
+	/* TOOLBAR */
+	ready_toolbar(toolbar){
+		var toolList = toolbar.toolList;
+		for(var i=0; i<toolList.length; i++){
+			toolList[i].element_html.classList.add("tool_button");
+		}
+		toolbar.currentTool.element_html.classList.replace("tool_button", "tool_button_current");
+	}
+
+	updateCurrentTool(toolbar){
+		var last = toolbar.lastTool.element_html;
+		var current = toolbar.currentTool.element_html;
+		if(last == current){
+			return;
+		}
+		if(last.classList.contains("tool_button_current"))
+			last.classList.replace("tool_button_current", "tool_button");
+		if(current.classList.contains("tool_button"))
+			current.classList.replace("tool_button", "tool_button_current");
+	}
+
+	/* CELLS */
 	ready_drawArea(quadricula){
 		this.DOM_workArea.innerHTML = "<svg id=\"drawArea\" width=\"100\" height=\"100\"></svg>";		//Valors per defecte
 		this.DOM_drawArea = this.DOM_workArea.firstElementChild;
@@ -246,8 +267,8 @@ class View{
 			this.setDefaultCellStyle(cela, pp);
 		}
 
-		this.resetWalls();
-
+		/* reset walls */
+		this.walls_html = []
 	}
 
 	setDefaultCellStyle(cela, pp){
@@ -262,6 +283,7 @@ class View{
 		rect.style.strokeOpacity = "0.2";
 	}
 
+	/* PATH */
 	setPathColor(model, index){
 		model.quadricula.cela[index].element_html.style.fill = this.properties.pathColor;
 	}
@@ -307,6 +329,7 @@ class View{
 		setTimeout(fadeOutEnd, tmax);
 	}
 
+	/* WALLS */
 	getWallCodeHtml(model, wall){
 		var pp = this.properties;
 		var cela = wall.cela;
@@ -333,26 +356,6 @@ class View{
 			"\" height=\""+ height +
 			"\" fill=\""+ this.properties.wallFillColor +
 			"\" x=\""+ x +"\" y=\""+ y +"\"></rect>";
-	}
-
-	ready_toolbar(toolbar){
-		var toolList = toolbar.toolList;
-		for(var i=0; i<toolList.length; i++){
-			toolList[i].element_html.classList.add("tool_button");
-		}
-		toolbar.currentTool.element_html.classList.replace("tool_button", "tool_button_current");
-	}
-
-	updateCurrentTool(toolbar){
-		var last = toolbar.lastTool.element_html;
-		var current = toolbar.currentTool.element_html;
-		if(last == current){
-			return;
-		}
-		if(last.classList.contains("tool_button_current"))
-			last.classList.replace("tool_button_current", "tool_button");
-		if(current.classList.contains("tool_button"))
-			current.classList.replace("tool_button", "tool_button_current");
 	}
 
 	draw(model){
@@ -386,11 +389,6 @@ class View{
 		this.DOM_walls.innerHTML = code_html;
 		console.log(count);
 	}
-
-	resetWalls(){
-		this.walls_html = []
-	}
-
 }
 
 class Model{
@@ -398,6 +396,7 @@ class Model{
 		this.quadricula;
 	}
 
+	/* WALLS */
 	getWalls(){
 		var wall, walls = [];
 		for(var i=0; i<this.quadricula.cela.length; i++){
@@ -470,7 +469,6 @@ class Model{
 		}
 	}
 
-
 	/* CELL EVENTS */
 	computeDirectionPath(path){
 		var columnes = this.quadricula.columnes;
@@ -491,6 +489,22 @@ class Model{
 			directionPath.push(direction);
 		}	
 		return directionPath;
+	}
+
+	destroyWall(index, side){
+		var cela = this.quadricula.cela;
+		var c = this.quadricula.columnes;
+		cela[index].wall[side] = null;
+		switch(side){
+			case 0: cela[index - c].wall[2] = null; break;
+			case 1: cela[index + 1].wall[3] = null; break;
+			case 2:
+				var cela2 = cela[index + c];
+				// console.log(cela2);
+				cela[index + c].wall[0] = null;
+				break;
+			case 3: cela[index - 1].wall[1] = null; break;
+		}
 	}
 
 	createPathWalls(path){
@@ -540,22 +554,6 @@ class Model{
 		}
 	}
 
-	destroyWall(index, side){
-		var cela = this.quadricula.cela;
-		var c = this.quadricula.columnes;
-		cela[index].wall[side] = null;
-		switch(side){
-			case 0: cela[index - c].wall[2] = null; break;
-			case 1: cela[index + 1].wall[3] = null; break;
-			case 2:
-				var cela2 = cela[index + c];
-				// console.log(cela2);
-				cela[index + c].wall[0] = null;
-				break;
-			case 3: cela[index - 1].wall[1] = null; break;
-		}
-	}
-
 	erasePathWalls(path){
 		var directionPath = this.computeDirectionPath(path);
 		var index;
@@ -567,7 +565,6 @@ class Model{
 			this.destroyWall(index, side);
 		}
 	}
-
 }
 
 class Controller{
@@ -577,15 +574,6 @@ class Controller{
 
 		this.ready_menu.call(this);
 
-		/* AIXO NO VA AQUI */
-		this.actionFunctions = {
-			createPathWalls : null,
-			erasePathWalls : null,
-			createBridge : null
-		};
-		this.define_actionFunctions();
-		/**/
-
 		this.toolbar_left = new Toolbar("tools_left");
 		this.ready_toolbar_left();
 
@@ -593,6 +581,7 @@ class Controller{
 		this.mouseIsDown = false;
 	}
 
+	/* MENU EVENTS */
 	ready_menu(){
 		document.getElementById("newLab").addEventListener('submit', this.newLab.bind(this), false);
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
@@ -623,113 +612,6 @@ class Controller{
 
 		document.getElementById("zoom_enquadra").addEventListener('click', zoomEnquadraValues.bind(this), false);
 		document.getElementById("zoom").addEventListener('submit', this.zoom.bind(this), false);
-
-	}
-
-
-	/* DESAPAREIX */
-	define_actionFunctions(){
-		this.actionFunctions.createPathWalls = function(path){
-			this.model.createPathWalls(path);
-			this.view.draw(this.model);
-		};
-
-		this.actionFunctions.erasePathWalls = function(path){
-			this.model.erasePathWalls(path);
-			this.view.draw(this.model);
-		};
-
-		this.actionFunctions.createBridge = function(){
-			console.log("createBridge is not implemented yet");
-		};
-	}
-	/* DESAPAREIX */
-
-
-	ready_toolbar_left(){
-		var toolElement = this.toolbar_left.element_html.firstElementChild.children;
-		this.toolbar_left.addTool(toolElement[0], "llapis", this.actionFunctions.createPathWalls.bind(this));
-		this.toolbar_left.addTool(toolElement[1], "goma", this.actionFunctions.erasePathWalls.bind(this));
-		this.toolbar_left.addTool(toolElement[2], "pont", this.actionFunctions.createBridge.bind(this));
-
-		for(var i=0; i<toolElement.length; i++){
-			toolElement[i].addEventListener('click', this.toolClickEvent.bind(this));
-		}
-
-		this.toolbar_left.indexToolbar();
-		this.view.ready_toolbar(this.toolbar_left);
-		this.view.updateCurrentTool(this.toolbar_left);
-	}
-
-	toolClickEvent(event){
-		var path = event.path;
-		var target;
-		for(var i=0; i<path.length; i++){
-			if(path[i].nodeName == "LI"){
-				target = path[i];
-				break;
-			}
-		}
-		this.toolbar_left.setCurrentTool(target.index);
-		this.view.updateCurrentTool(this.toolbar_left);
-	}
-
-	cellMousedownEvent(event){
-		this.mouseIsDown = true;
-		this.view.setPathColor(this.model, event.target.index);
-
-		// actionStack s'ha de transformar competament
-		var path = [];
-		path.push(event.target.index);
-		this.actionStack.push(path);
-	}
-
-	cellMouseenterEvent(event){
-		if(this.mouseIsDown){
-			this.view.setPathColor(this.model, event.target.index);
-			// actionStack s'ha de transformar competament
-			this.actionStack[this.actionStack.length-1].push(event.target.index);
-		}
-	}
-
-	cellMouseupEvent(event){
-		this.mouseIsDown = false;
-		this.view.setPathColor(this.model, event.target.index);
-	
-		// actionStack s'ha de transformar competament
-		var path = this.actionStack[this.actionStack.length-1];
-		var tool = this.toolbar_left.currentTool;
-
-		// this.toolbar_left.currentTool.action(path);
-
-		if(tool.name == "llapis"){
-			this.model.createPathWalls(path);
-			this.view.draw(this.model);
-		}
-		else if(tool.name == "goma"){
-			this.model.erasePathWalls(path);
-			this.view.draw(this.model);
-		}
-		else if(tool.name == "pont"){
-			console.log("createBridge is not implemented yet");
-		}
-
-		this.view.fadeOutColor(this.model, path);
-	}
-
-	cellClickEvent(event){}
-
-	ready_cell_events(){
-		var cela = this.model.quadricula.cela;
-		var e;
-		for(var i=0; i<cela.length; i++){
-			e = cela[i].element_html;
-			e.addEventListener("click", this.cellClickEvent.bind(this));
-			e.addEventListener("mousedown", this.cellMousedownEvent.bind(this));
-			e.addEventListener("mouseup", this.cellMouseupEvent.bind(this));
-			e.addEventListener("mouseenter", this.cellMouseenterEvent.bind(this));
-			// e.addEventListener("mouseover", this.cellMouseoverEvent);
-		}
 	}
 
 	newLab(event){
@@ -843,6 +725,93 @@ class Controller{
 		}
 	}
 
+	/* TOOLBAR EVENTS */
+	ready_toolbar_left(){
+		var toolElement = this.toolbar_left.element_html.firstElementChild.children;
+		this.toolbar_left.addTool(toolElement[0], "llapis");
+		this.toolbar_left.addTool(toolElement[1], "goma");
+		this.toolbar_left.addTool(toolElement[2], "pont");
+
+		for(var i=0; i<toolElement.length; i++){
+			toolElement[i].addEventListener('click', this.toolClickEvent.bind(this));
+		}
+
+		this.toolbar_left.indexToolbar();
+		this.view.ready_toolbar(this.toolbar_left);
+		this.view.updateCurrentTool(this.toolbar_left);
+	}
+
+	toolClickEvent(event){
+		var path = event.path;
+		var target;
+		for(var i=0; i<path.length; i++){
+			if(path[i].nodeName == "LI"){
+				target = path[i];
+				break;
+			}
+		}
+		this.toolbar_left.setCurrentTool(target.index);
+		this.view.updateCurrentTool(this.toolbar_left);
+	}
+
+	/* CELL EVENTS */
+	ready_cell_events(){
+		var cela = this.model.quadricula.cela;
+		var e;
+		for(var i=0; i<cela.length; i++){
+			e = cela[i].element_html;
+			e.addEventListener("click", this.cellClickEvent.bind(this));
+			e.addEventListener("mousedown", this.cellMousedownEvent.bind(this));
+			e.addEventListener("mouseup", this.cellMouseupEvent.bind(this));
+			e.addEventListener("mouseenter", this.cellMouseenterEvent.bind(this));
+			// e.addEventListener("mouseover", this.cellMouseoverEvent);
+		}
+	}
+
+	cellMousedownEvent(event){
+		this.mouseIsDown = true;
+		this.view.setPathColor(this.model, event.target.index);
+
+		// actionStack s'ha de transformar competament
+		var path = [];
+		path.push(event.target.index);
+		this.actionStack.push(path);
+	}
+
+	cellMouseenterEvent(event){
+		if(this.mouseIsDown){
+			this.view.setPathColor(this.model, event.target.index);
+			// actionStack s'ha de transformar competament
+			this.actionStack[this.actionStack.length-1].push(event.target.index);
+		}
+	}
+
+	cellMouseupEvent(event){
+		this.mouseIsDown = false;
+		this.view.setPathColor(this.model, event.target.index);
+	
+		// actionStack s'ha de transformar competament
+		var path = this.actionStack[this.actionStack.length-1];
+		var tool = this.toolbar_left.currentTool;
+
+		// this.toolbar_left.currentTool.action(path);
+
+		if(tool.name == "llapis"){
+			this.model.createPathWalls(path);
+			this.view.draw(this.model);
+		}
+		else if(tool.name == "goma"){
+			this.model.erasePathWalls(path);
+			this.view.draw(this.model);
+		}
+		else if(tool.name == "pont"){
+			console.log("createBridge is not implemented yet");
+		}
+
+		this.view.fadeOutColor(this.model, path);
+	}
+
+	cellClickEvent(event){}
 }
 
 window.onload = function(){
