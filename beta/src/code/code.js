@@ -165,7 +165,7 @@ class View{
 			'wallFillColor': "#333",
 
 			'defaultColor': '#fff', 		//'rgb (255, 255, 255)',
-			'mouseoverColor': '#ddd',
+			'selectColor': '#ddd',
 			'pathColor': '#888'
 			// 'clickColor': '#fbb',
 			// 'mousedownColor': '#bfb',
@@ -286,6 +286,52 @@ class View{
 	/* PATH */
 	setPathColor(model, index){
 		model.quadricula.cela[index].element_html.style.fill = this.properties.pathColor;
+	}
+
+	fadeOutColor(controller, path){
+		var startTime = Date.now();
+		var tmax = 1500;
+		var fps = 60;
+		
+		var cela = controller.model.quadricula.cela;
+		var cellPath = [];
+		for(var i=0; i<path.length; i++){
+			cellPath.push(cela[path[i]]);
+		}
+
+		// var startColor = new Color3(cellPath[0].element_html.style.fill);
+		var startColor = new Color3(this.properties.pathColor);
+		var targetColor = new Color3(this.properties.defaultColor);
+		var colorVector = targetColor.subtract(startColor);
+
+		var interval;
+		var fadeOutEnd = function(){
+			clearInterval(interval);
+			if(!this.mouseIsDown){
+				for(var i=0; i<controller.model.quadricula.numCeles; i++){
+					cela[i].element_html.style.fill = targetColor;
+				}
+			}
+		};
+
+		var fadeOutStep = function(){
+			var elapsedTime = Date.now() - startTime;
+			var timeVariation = elapsedTime/tmax;
+			var colorVariation = colorVector.multiply(timeVariation);
+			var color = startColor.add(colorVariation);
+
+			if(targetColor == color){
+				console.log("FadeOut is done");
+				return;
+			}else{
+				for(var i=0; i<cellPath.length; i++){
+					cellPath[i].element_html.style.fill = color;
+				}
+			}
+		};
+
+		interval = setInterval(fadeOutStep, 1000/fps);
+		setTimeout(fadeOutEnd.bind(controller), tmax);
 	}
 
 	/* WALLS */
@@ -767,60 +813,10 @@ class Controller{
 			console.log("createBridge is not implemented yet");
 		}
 
-		this.fadeOutColor(path);
+		this.view.fadeOutColor(this, path);
 	}
 
 	cellClickEvent(event){}
-
-
-
-	fadeOutColor(path){
-		var startTime = Date.now();
-		var tmax = 1500;
-		var fps = 60;
-		
-		var model = this.model;
-		var cela = this.model.quadricula.cela;
-		var cellPath = [];
-		for(var i=0; i<path.length; i++){
-			cellPath.push(cela[path[i]]);
-		}
-
-		var startColor = new Color3(cellPath[0].element_html.style.fill);	//Aixo hauria de venir de view.properties
-		var targetColor = new Color3(this.view.properties.defaultColor);
-		var colorVector = targetColor.subtract(startColor);
-
-		var interval;
-		var fadeOutEnd = function(mouseIsDown){
-			clearInterval(interval);
-			if(!this.mouseIsDown){
-				var cela = model.quadricula.cela;
-				for(var i=0; i<model.quadricula.numCeles; i++){
-					cela[i].element_html.style.fill = targetColor;
-				}
-			}
-		};
-
-		var fadeOutStep = function(){
-			var elapsedTime = Date.now() - startTime;
-			// console.log(elapsedTime);
-			var timeVariation = elapsedTime/tmax;
-			var colorVariation = colorVector.multiply(timeVariation);
-			var color = startColor.add(colorVariation);
-
-			if(targetColor == color){
-				console.log("FadeOut is done");
-				return;
-			}else{
-				for(var i=0; i<cellPath.length; i++){
-					cellPath[i].element_html.style.fill = color;
-				}
-			}
-		};
-
-		interval = setInterval(fadeOutStep, 1000/fps);
-		setTimeout(fadeOutEnd.bind(this), tmax);
-	}
 
 
 }
