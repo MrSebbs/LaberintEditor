@@ -288,47 +288,6 @@ class View{
 		model.quadricula.cela[index].element_html.style.fill = this.properties.pathColor;
 	}
 
-	fadeOutColor(model, path){
-		var startTime = Date.now();
-		var tmax = 1500;
-		var fps = 60;
-		
-		var cela = model.quadricula.cela;
-		var cellPath = [];
-		for(var i=0; i<path.length; i++){
-			cellPath.push(cela[path[i]]);
-		}
-
-		var startColor = new Color3(cellPath[0].element_html.style.fill);	//Aixo hauria de venir de view.properties
-		var targetColor = new Color3(this.properties.defaultColor);
-		var colorVector = targetColor.subtract(startColor);
-
-		var interval;
-		var fadeOutEnd = function(){
-			clearInterval(interval);
-		};
-
-		var fadeOutStep = function(){
-			var elapsedTime = Date.now() - startTime;
-			// console.log(elapsedTime);
-			var timeVariation = elapsedTime/tmax;
-			var colorVariation = colorVector.multiply(timeVariation);
-			var color = startColor.add(colorVariation);
-
-			if(targetColor == color){
-				console.log("FadeOut is done");
-				return;
-			}else{
-				for(var i=0; i<cellPath.length; i++){
-					cellPath[i].element_html.style.fill = color;
-				}
-			}
-		};
-
-		interval = setInterval(fadeOutStep, 1000/fps);
-		setTimeout(fadeOutEnd, tmax);
-	}
-
 	/* WALLS */
 	getWallCodeHtml(model, wall){
 		var pp = this.properties;
@@ -808,10 +767,62 @@ class Controller{
 			console.log("createBridge is not implemented yet");
 		}
 
-		this.view.fadeOutColor(this.model, path);
+		this.fadeOutColor(path);
 	}
 
 	cellClickEvent(event){}
+
+
+
+	fadeOutColor(path){
+		var startTime = Date.now();
+		var tmax = 1500;
+		var fps = 60;
+		
+		var model = this.model;
+		var cela = this.model.quadricula.cela;
+		var cellPath = [];
+		for(var i=0; i<path.length; i++){
+			cellPath.push(cela[path[i]]);
+		}
+
+		var startColor = new Color3(cellPath[0].element_html.style.fill);	//Aixo hauria de venir de view.properties
+		var targetColor = new Color3(this.view.properties.defaultColor);
+		var colorVector = targetColor.subtract(startColor);
+
+		var interval;
+		var fadeOutEnd = function(mouseIsDown){
+			clearInterval(interval);
+			if(!this.mouseIsDown){
+				var cela = model.quadricula.cela;
+				for(var i=0; i<model.quadricula.numCeles; i++){
+					cela[i].element_html.style.fill = targetColor;
+				}
+			}
+		};
+
+		var fadeOutStep = function(){
+			var elapsedTime = Date.now() - startTime;
+			// console.log(elapsedTime);
+			var timeVariation = elapsedTime/tmax;
+			var colorVariation = colorVector.multiply(timeVariation);
+			var color = startColor.add(colorVariation);
+
+			if(targetColor == color){
+				console.log("FadeOut is done");
+				return;
+			}else{
+				for(var i=0; i<cellPath.length; i++){
+					cellPath[i].element_html.style.fill = color;
+				}
+			}
+		};
+
+		interval = setInterval(fadeOutStep, 1000/fps);
+		setTimeout(fadeOutEnd.bind(this), tmax);
+	}
+
+
 }
 
 window.onload = function(){

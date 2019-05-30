@@ -6,7 +6,6 @@ FEINA A FER
 PRIORITATS
 ----------------------------------------------------
 
-
 Control d'idioma
 Idioma. Tot en anglès
 
