@@ -1,11 +1,5 @@
 Javi Agenjo:
 
-variable global
-var editor (porta del darrere)
-
-
-separacio model - view - controller
-
 
 Afegir index a HTMLElement:
 celes
@@ -13,21 +7,31 @@ tools
 Seria millor fer-ho afegint un ID?
 
 
-toolbar:
-canvi de class: currentTool
-action (massa rebuscat?)
+
+/*** GESTIONAR ACTIONS ***/
+this.action = [];
+defineActions();
+mouseEvent(event){
+	call(this.action[current_tool.index])
+}
 
 
-Ctrl + Z:
-Com ho faig? Guardo tot el Laberint?
+
+/*** GUARDAR LABERINT ***/
+Format JSON per guardar Lab
+Model: 20x20 = 400 celes 
+View: 21 verticals + 21 horitzontals = 42 arrays
+[0, 4, 7, 9, 15, 20] = 0-4 paret + 7-9 paret + 15-20 paret
 
 
-delete
-He d'eliminar les variables després de fer-les servir?
 
 
-testing
-Mètode de tests per no espatallar coses que abans funcionaven
+Actualitzar Laberint (F5)
+És una bona idea????
+
+
+
+/*** ESTRUCTURAR EN FITXERS ***/
 
 
 linode

@@ -255,20 +255,20 @@ class View{
 		this.DOM_walls.width.baseVal.value = pp.width;
 		this.DOM_walls.height.baseVal.value = pp.height;
 
-		var code_html = "";
-		for(var i=0; i<quadricula.numCeles; i++){
+		var i, code_html = "";
+		for(i=0; i<quadricula.numCeles; i++){
 			code_html += "<rect width=\"10\" height=\"10\"></rect>";
 		}
 		this.DOM_quadricula.innerHTML = code_html;
 
-		for(var i=0; i<quadricula.numCeles; i++){
+		for(i=0; i<quadricula.numCeles; i++){
 			var cela = quadricula.cela[i];
 			cela.element_html = this.DOM_quadricula.children[i];
 			this.setDefaultCellStyle(cela, pp);
 		}
 
 		/* reset walls */
-		this.walls_html = []
+		this.walls_html = [];
 	}
 
 	setDefaultCellStyle(cela, pp){
@@ -367,15 +367,16 @@ class View{
 		var wall, code_html = "";		//Omplir les dades que passarem a innerHTML
 		var cela = model.quadricula.cela;
 
-		var count = 0;
+		var i, s, count = 0;
 
 		if (this.walls_html.length == 0)
-			for(var i=0; i<cela.length; i++)
-				for(var s=0; s<4; s++)
+			for(i=0; i<cela.length; i++)
+				for(s=0; s<4; s++)
 					this.walls_html.push("");
-
-		for(var i=0; i<cela.length; i++){
-			for(var s=0; s<4; s++){
+		
+    
+		for(i=0; i<cela.length; i++){
+			for(s=0; s<4; s++){
 
 				wall = cela[i].wall[s];
 				if(wall == null){
@@ -421,31 +422,31 @@ class Model{
 		var quadricula = this.quadricula;
 		var files = quadricula.files;
 		var columnes = quadricula.columnes;
-		var cela, side;
+		var cela, side, i;
 
 		// top: side 0, index: (i, 0)
-		for (var i=0; i<columnes; i++){
+		for (i=0; i<columnes; i++){
 			cela = quadricula.getCela(i, 0);
 			side = 0;	//top
 			new Wall(cela, side);
 		}
 
 		// right: side 1, index: (columnes-1, i)
-		for (var i=0; i<files; i++){
+		for (i=0; i<files; i++){
 			cela = quadricula.getCela(columnes-1, i);
 			side = 1;	//right
 			new Wall(cela, side);
 		}
 
 		// bottom: side 2, index: (i, files-1)
-		for (var i=0; i<columnes; i++){
+		for (i=0; i<columnes; i++){
 			cela = quadricula.getCela(i, files-1);
 			side = 2;	//bottom
 			new Wall(cela, side);
 		}
 
 		// left: side 3, index: (0, i)
-		for (var i=0; i<files; i++){
+		for (i=0; i<files; i++){
 			cela = quadricula.getCela(0, i);
 			side = 3;	//left
 			new Wall(cela, side);
@@ -503,11 +504,7 @@ class Model{
 		switch(side){
 			case 0: cela[index - c].wall[2] = null; break;
 			case 1: cela[index + 1].wall[3] = null; break;
-			case 2:
-				var cela2 = cela[index + c];
-				// console.log(cela2);
-				cela[index + c].wall[0] = null;
-				break;
+			case 2: cela[index + c].wall[0] = null; break;
 			case 3: cela[index - 1].wall[1] = null; break;
 		}
 	}
@@ -515,14 +512,14 @@ class Model{
 	createPathWalls(path){
 		var directionPath = this.computeDirectionPath(path);
 		var directionChange = [0];
-		for(var i=1; i<directionPath.length; i++){
+    var corner, cela, index, i;
+    
+		for(i=1; i<directionPath.length; i++){
 			directionChange.push(directionPath[i] - directionPath[i-1]);
 		}
 
-		var index;
-		var cela;
-		var corner;
-		for(var i=0; i<path.length - 1; i++){
+		
+		for(i=0; i<path.length - 1; i++){
 			index = path[i];
 			cela = this.quadricula.cela[index];
 			cela.wall = [null, null, null, null];
@@ -551,7 +548,7 @@ class Model{
 		// ultim element
 		index = path[path.length - 1];
 		cela = this.quadricula.cela[index];
-		for(var i=0; i<4; i++){
+		for(i=0; i<4; i++){
 			var dif = directionPath[directionPath.length - 1] - i;
 			if(dif % 2 != 0){
 				new Wall(cela, i);
@@ -712,7 +709,7 @@ class Controller{
 
 	zoom(event){
 		this.view.displayOff("modal_zoom");
-		var percent, cell, wall;	
+		var percent;	
 		if(event.target.id == "zoom_enquadra"){
 			console.log("Enquadra");
 		}else if(event.target.id == "zoom"){
