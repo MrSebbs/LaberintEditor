@@ -12,30 +12,24 @@ Idioma. Tot en anglès
 
 Estructurar en fitxers
 
-Console.log() netejar
-
-
 
 ----------------------------------------------------
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
-paths de longitud 2 que s'entrecreuen malament
-
-
-erasePathWalls:
-Esborrar totes les parets si path.length = 1
-
-
-Path:
-Tirar endarrere (girar 180 graus)
-Trencar la la paret de path[0]
-
-
 Ctrl + Z:
 new actionStack
 class dins de controller
 
+
+Keyboard per navegar per la toolbar
+L -> llapis
+G -> goma
+
+
+Toolbar:
+Unificar format dels svg
+Petit programa de càlcul de vectors
 
 
 ----------------------------------------------------

@@ -34,5 +34,11 @@ Actualitzar Laberint (F5)
 /*** ESTRUCTURAR EN FITXERS ***/
 
 
+
+https://jshint.com/
+Do not use 'new' for side effects.
+new Wall
+
+
 linode
 Servidors. Donar-hi un cop d'ull
