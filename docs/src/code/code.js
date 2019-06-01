@@ -5,7 +5,6 @@ class Color3 {
 		var rgb;
 		if(arguments.length == 1){
 			var str = arguments[0];
-			// console.log(str);
 			if(str[0] == 'r' && str[1] == 'g' && str[2] == 'b'){
 				str = str.slice(4, str.length-1);			
 				rgb = str.split(", ");
@@ -89,7 +88,7 @@ class Toolbar {
 
 	setCurrentTool(index){
 		if(this.toolList.length <= index){
-			console.log("Aquest boto no consta a toolList");
+			console.log("button does not belong to toolList");
 			return;
 		}
 		this.lastTool = this.currentTool;
@@ -320,18 +319,22 @@ class View{
 			var colorVariation = colorVector.multiply(timeVariation);
 			var color = startColor.add(colorVariation);
 
-			if(targetColor == color){
-				console.log("FadeOut is done");
-				return;
-			}else{
-				for(var i=0; i<cellPath.length; i++){
-					cellPath[i].element_html.style.fill = color;
-				}
+			// if(targetColor == color){				// == not working with color3
+			// 	console.log("FadeOut is done");
+			// 	return;
+			// }else{
+			// 	for(var i=0; i<cellPath.length; i++){
+			// 		cellPath[i].element_html.style.fill = color;
+			// 	}
+			// }
+
+			for(var i=0; i<cellPath.length; i++){
+				cellPath[i].element_html.style.fill = color;
 			}
 		};
 
 		interval = setInterval(fadeOutStep, 1000/fps);
-		setTimeout(fadeOutEnd.bind(controller), tmax);
+		setTimeout(fadeOutEnd.bind(controller), tmax+500);
 	}
 
 	/* WALLS */
@@ -366,15 +369,13 @@ class View{
 	draw(model){
 		var wall, code_html = "";		//Omplir les dades que passarem a innerHTML
 		var cela = model.quadricula.cela;
-
-		var i, s, count = 0;
+		var i, s;
 
 		if (this.walls_html.length == 0)
 			for(i=0; i<cela.length; i++)
 				for(s=0; s<4; s++)
 					this.walls_html.push("");
 		
-    
 		for(i=0; i<cela.length; i++){
 			for(s=0; s<4; s++){
 
@@ -386,14 +387,12 @@ class View{
 
 				if(this.walls_html[4*i + s] == ""){
 					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
-					count++;
 				}
 
 				code_html += this.walls_html[4*i + s];
 			}
 		}
 		this.DOM_walls.innerHTML = code_html;
-		console.log(count);
 	}
 }
 
@@ -456,10 +455,10 @@ class Model{
 	/* MENU EVENTS */
 	loadLab(data){
 		if(!data.header){
-			console.log("No es pot llegir el fitxer");
+			console.log("Can't read file");
 			return;
 		}else if(data.header.celes != data.wall.length){
-			console.log("Fitxer incoherent");
+			console.log("Unsuported file");
 			return;
 		}
 
@@ -493,7 +492,8 @@ class Model{
 				direction = 0;
 			}
 			directionPath.push(direction);
-		}	
+		}
+		directionPath.push(direction);
 		return directionPath;
 	}
 
@@ -512,21 +512,30 @@ class Model{
 	createPathWalls(path){
 		var directionPath = this.computeDirectionPath(path);
 		var directionChange = [0];
-    var corner, cela, index, i;
+    	var corner, cela;
+    	var index, i, p, c, r;
     
 		for(i=1; i<directionPath.length; i++){
 			directionChange.push(directionPath[i] - directionPath[i-1]);
 		}
+		// console.log(directionPath)
+		// console.log(directionChange)
 
-		
-		for(i=0; i<path.length - 1; i++){
+		// primer element
+		p = (directionPath[0] + 2)%4;
+		index = path[0];
+		this.destroyWall(index, p);
+
+
+		for(i=0; i<path.length; i++){
 			index = path[i];
 			cela = this.quadricula.cela[index];
 			cela.wall = [null, null, null, null];
 
 			if(directionChange[i] == 0){
-				//Parets Paraleles
+				// Recte
 				if(directionPath[i] % 2 == 0){
+					//Parets Paraleles
 					new Wall(cela, 1);
 					new Wall(cela, 3);
 				}else if(directionPath[i] % 2 == 1){
@@ -534,8 +543,9 @@ class Model{
 					new Wall(cela, 2);
 				}
 			}else if(directionChange[i] % 2 != 0){
-				var p = directionPath[i-1];
-				var c = directionChange[i];
+				// Cantonada
+				p = directionPath[i-1];
+				c = directionChange[i];
 				corner = [p, p-c];
 
 				if(corner[1] < 0) corner[1] += 4;
@@ -543,23 +553,20 @@ class Model{
 
 				new Wall(cela, corner[0]);
 				new Wall(cela, corner[1]);
-			}
-		}
-		// ultim element
-		index = path[path.length - 1];
-		cela = this.quadricula.cela[index];
-		for(i=0; i<4; i++){
-			var dif = directionPath[directionPath.length - 1] - i;
-			if(dif % 2 != 0){
-				new Wall(cela, i);
+			}else if(directionChange[i] % 2 == 0){
+				// Retrocedir
+				p = directionPath[i];
+				for(r=0; r<4; r++){
+					if(p
+					 != r) new Wall(cela, r);
+				}
 			}
 		}
 	}
 
 	erasePathWalls(path){
 		var directionPath = this.computeDirectionPath(path);
-		var index;
-		var side;
+		var index, side;
 
 		for(var i=0; i<path.length - 1; i++){
 			index = path[i];
@@ -636,10 +643,10 @@ class Controller{
 		this.view.displayOff("modal_loadLab");
 		var files = event.target.files;
 		if (!files[0]) {
-			console.log("no hi ha cap fitxer");
+			console.log("File not found");
 			return;
 		}else if(files.length > 1){
-			console.log("hi ha mes d'un fitxer");
+			console.log("Too many files");
 		}
 		var reader = new FileReader();
 		reader.readAsText(files[0]);
@@ -711,9 +718,8 @@ class Controller{
 		this.view.displayOff("modal_zoom");
 		var percent;	
 		if(event.target.id == "zoom_enquadra"){
-			console.log("Enquadra");
+			console.log("Enquadra not implemented yet");
 		}else if(event.target.id == "zoom"){
-			console.log("Zoom: " + event.target[0].value);
 			percent = event.target[0].value/100;
 			
 			var pp = this.view.properties;
@@ -807,15 +813,13 @@ class Controller{
 			this.view.draw(this.model);
 		}
 		else if(tool.name == "pont"){
-			console.log("createBridge is not implemented yet");
+			console.log("createBridge not implemented yet");
 		}
 
 		this.view.fadeOutColor(this, path);
 	}
 
 	cellClickEvent(event){}
-
-
 }
 
 window.onload = function(){
