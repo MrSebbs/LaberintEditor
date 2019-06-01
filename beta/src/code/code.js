@@ -58,7 +58,7 @@ class Color3 {
 }
 
 class Tool {
-	constructor(element, name, actionFunction){
+	constructor(element, name){
 		this.element_html = element;
 		this.name = name;
 		this.element_html.title = name;
@@ -74,8 +74,8 @@ class Toolbar {
 		this.currentTool;
 	}
 
-	addTool(element, name, actionFunction){
-		this.toolList.push(new Tool(element, name, actionFunction));
+	addTool(element, name){
+		this.toolList.push(new Tool(element, name));
 	}
 
 	indexToolbar(){
@@ -97,14 +97,14 @@ class Toolbar {
 }
 
 class Wall {
-	constructor(cela, side){
-		this.cela = cela;
+	constructor(cell, side){
+		this.cell = cell;
 		this.side = side;
-		this.cela.wall[side] = this;
+		this.cell.wall[side] = this;
 	}
 }
 
-class Cela {
+class Cell {
 	constructor(index){
 		this.index = index;
 		this.x;
@@ -113,18 +113,18 @@ class Cela {
 		this.wall = [null, null, null, null];
 	}
 
-	setxy(columnes){
-		this.x = this.index%columnes;
-		this.y = (this.index - this.x)/columnes;
+	setxy(columns){
+		this.x = this.index%columns;
+		this.y = (this.index - this.x)/columns;
 	}
 }
 
-class Quadricula {
-	constructor(columnes, files){
-		this.columnes = parseInt(columnes);
-		this.files = parseInt(files);
-		this.numCeles = columnes * files;
-		this.cela = [];
+class Grid {
+	constructor(columns, rows){
+		this.columns = parseInt(columns);
+		this.rows = parseInt(rows);
+		this.numCells = columns * rows;
+		this.cell = [];
 		this.wall = [];
 
 		this.drawArea;
@@ -132,19 +132,19 @@ class Quadricula {
 	}
 
 	loadCells(){
-		for(var i=0; i<this.numCeles; i++){
-			this.cela.push( new Cela(i) );
-			var cela = this.cela[i];
-			cela.setxy(this.columnes);
+		for(var i=0; i<this.numCells; i++){
+			this.cell.push( new Cell(i) );
+			var cell = this.cell[i];
+			cell.setxy(this.columns);
 		}
 	}
 
 	getIndex(x, y){
-		return y * this.columnes + x;
+		return y * this.columns + x;
 	}
 
-	getCela(x, y){
-		return this.cela[y * this.columnes + x];
+	getCell(x, y){
+		return this.cell[y * this.columns + x];
 	}
 }
 
@@ -152,7 +152,7 @@ class View{
 	constructor(){
 		this.DOM_workArea = document.getElementById("workArea");
 		this.DOM_drawArea;
-		this.DOM_quadricula;
+		this.DOM_grid;
 		this.DOM_walls;
 		this.properties = {
 			'side_length': 50,
@@ -173,7 +173,6 @@ class View{
 		};
 
 		this.walls_html = [];
-
 		this.ready_modals();
 	}
 
@@ -230,51 +229,51 @@ class View{
 	}
 
 	/* CELLS */
-	ready_drawArea(quadricula){
+	ready_drawArea(grid){
 		this.DOM_workArea.innerHTML = "<svg id=\"drawArea\" width=\"100\" height=\"100\"></svg>";		//Valors per defecte
 		this.DOM_drawArea = this.DOM_workArea.firstElementChild;
 
 		var pp = this.properties;
 
-		this.DOM_drawArea.innerHTML = "<svg id=\"Quadricula\" width=\"100\" height=\"100\"></svg>";		//Valors per defecte
+		this.DOM_drawArea.innerHTML = "<svg id=\"Grid\" width=\"100\" height=\"100\"></svg>";		//Valors per defecte
 		this.DOM_drawArea.innerHTML += "<svg id=\"Walls\" width=\"100\" height=\"100\"></svg>";			//Valors per defecte
 
-		this.DOM_quadricula = this.DOM_drawArea.children[0];
+		this.DOM_grid = this.DOM_drawArea.children[0];
 		this.DOM_walls = this.DOM_drawArea.children[1];
 
-		pp.width = quadricula.columnes * pp.side_length + 2 * pp.margin;
-		pp.height = quadricula.files * pp.side_length + 2 * pp.margin;
+		pp.width = grid.columns * pp.side_length + 2 * pp.margin;
+		pp.height = grid.rows * pp.side_length + 2 * pp.margin;
 
 		this.DOM_drawArea.width.baseVal.value = pp.width;
 		this.DOM_drawArea.height.baseVal.value = pp.height;
 
-		this.DOM_quadricula.width.baseVal.value = pp.width;
-		this.DOM_quadricula.height.baseVal.value = pp.height;
+		this.DOM_grid.width.baseVal.value = pp.width;
+		this.DOM_grid.height.baseVal.value = pp.height;
 
 		this.DOM_walls.width.baseVal.value = pp.width;
 		this.DOM_walls.height.baseVal.value = pp.height;
 
 		var i, code_html = "";
-		for(i=0; i<quadricula.numCeles; i++){
+		for(i=0; i<grid.numCells; i++){
 			code_html += "<rect width=\"10\" height=\"10\"></rect>";
 		}
-		this.DOM_quadricula.innerHTML = code_html;
+		this.DOM_grid.innerHTML = code_html;
 
-		for(i=0; i<quadricula.numCeles; i++){
-			var cela = quadricula.cela[i];
-			cela.element_html = this.DOM_quadricula.children[i];
-			this.setDefaultCellStyle(cela, pp);
+		for(i=0; i<grid.numCells; i++){
+			var cell = grid.cell[i];
+			cell.element_html = this.DOM_grid.children[i];
+			this.setDefaultCellStyle(cell, pp);
 		}
 
 		/* reset walls */
 		this.walls_html = [];
 	}
 
-	setDefaultCellStyle(cela, pp){
-		var rect = cela.element_html;
-		rect.index = cela.index;
-		rect.x.baseVal.value = cela.x * pp.side_length + pp.margin;
-		rect.y.baseVal.value = cela.y * pp.side_length + pp.margin;
+	setDefaultCellStyle(cell, pp){
+		var rect = cell.element_html;
+		rect.index = cell.index;
+		rect.x.baseVal.value = cell.x * pp.side_length + pp.margin;
+		rect.y.baseVal.value = cell.y * pp.side_length + pp.margin;
 		rect.width.baseVal.value = pp.side_length;
 		rect.height.baseVal.value = pp.side_length;
 		rect.style.fill = pp.defaultColor;
@@ -284,7 +283,7 @@ class View{
 
 	/* PATH */
 	setPathColor(model, index){
-		model.quadricula.cela[index].element_html.style.fill = this.properties.pathColor;
+		model.grid.cell[index].element_html.style.fill = this.properties.pathColor;
 	}
 
 	fadeOutColor(controller, path){
@@ -292,10 +291,10 @@ class View{
 		var tmax = 1500;
 		var fps = 60;
 		
-		var cela = controller.model.quadricula.cela;
+		var cell = controller.model.grid.cell;
 		var cellPath = [];
 		for(var i=0; i<path.length; i++){
-			cellPath.push(cela[path[i]]);
+			cellPath.push(cell[path[i]]);
 		}
 
 		// var startColor = new Color3(cellPath[0].element_html.style.fill);
@@ -307,8 +306,8 @@ class View{
 		var fadeOutEnd = function(){
 			clearInterval(interval);
 			if(!this.mouseIsDown){
-				for(var i=0; i<controller.model.quadricula.numCeles; i++){
-					cela[i].element_html.style.fill = targetColor;
+				for(var i=0; i<controller.model.grid.numCells; i++){
+					cell[i].element_html.style.fill = targetColor;
 				}
 			}
 		};
@@ -340,10 +339,10 @@ class View{
 	/* WALLS */
 	getWallCodeHtml(model, wall){
 		var pp = this.properties;
-		var cela = wall.cela;
+		var cell = wall.cell;
 
-		var x = cela.x * pp.side_length + pp.margin - pp.wall_stroke;
-		var y = cela.y * pp.side_length + pp.margin - pp.wall_stroke;
+		var x = cell.x * pp.side_length + pp.margin - pp.wall_stroke;
+		var y = cell.y * pp.side_length + pp.margin - pp.wall_stroke;
 		var width = pp.side_length + 2 * pp.wall_stroke;
 		var height = 2 * pp.wall_stroke;
 
@@ -368,27 +367,24 @@ class View{
 
 	draw(model){
 		var wall, code_html = "";		//Omplir les dades que passarem a innerHTML
-		var cela = model.quadricula.cela;
+		var cell = model.grid.cell;
 		var i, s;
 
 		if (this.walls_html.length == 0)
-			for(i=0; i<cela.length; i++)
+			for(i=0; i<cell.length; i++)
 				for(s=0; s<4; s++)
 					this.walls_html.push("");
 		
-		for(i=0; i<cela.length; i++){
+		for(i=0; i<cell.length; i++){
 			for(s=0; s<4; s++){
-
-				wall = cela[i].wall[s];
+				wall = cell[i].wall[s];
 				if(wall == null){
 					this.walls_html[4*i + s] = "";
 					continue;
 				}
-
 				if(this.walls_html[4*i + s] == ""){
 					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
 				}
-
 				code_html += this.walls_html[4*i + s];
 			}
 		}
@@ -398,85 +394,68 @@ class View{
 
 class Model{
 	constructor(){
-		this.quadricula;
+		this.grid;
 	}
 
 	/* WALLS */
 	getWalls(){
 		var wall, walls = [];
-		for(var i=0; i<this.quadricula.cela.length; i++){
+		for(var i=0; i<this.grid.cell.length; i++){
 			for(var s=0; s<4; s++){
-				wall = this.quadricula.cela[i].wall[s];
+				wall = this.grid.cell[i].wall[s];
 				if(wall) walls.push(wall);
 			}
 		}
 		return walls;
 	}
 
-	removeWall(cela, side){
-		cela.wall[side] = null;
+	removeWall(cell, side){
+		cell.wall[side] = null;
 	}
 
 	loadBorders(){
-		var quadricula = this.quadricula;
-		var files = quadricula.files;
-		var columnes = quadricula.columnes;
-		var cela, side, i;
+		var grid = this.grid;
+		var rows = grid.rows;
+		var columns = grid.columns;
+		var cell, side, i;
 
 		// top: side 0, index: (i, 0)
-		for (i=0; i<columnes; i++){
-			cela = quadricula.getCela(i, 0);
+		for (i=0; i<columns; i++){
+			cell = grid.getCell(i, 0);
 			side = 0;	//top
-			new Wall(cela, side);
+			new Wall(cell, side);
 		}
 
-		// right: side 1, index: (columnes-1, i)
-		for (i=0; i<files; i++){
-			cela = quadricula.getCela(columnes-1, i);
+		// right: side 1, index: (columns-1, i)
+		for (i=0; i<rows; i++){
+			cell = grid.getCell(columns-1, i);
 			side = 1;	//right
-			new Wall(cela, side);
+			new Wall(cell, side);
 		}
 
-		// bottom: side 2, index: (i, files-1)
-		for (i=0; i<columnes; i++){
-			cela = quadricula.getCela(i, files-1);
+		// bottom: side 2, index: (i, rows-1)
+		for (i=0; i<columns; i++){
+			cell = grid.getCell(i, rows-1);
 			side = 2;	//bottom
-			new Wall(cela, side);
+			new Wall(cell, side);
 		}
 
 		// left: side 3, index: (0, i)
-		for (i=0; i<files; i++){
-			cela = quadricula.getCela(0, i);
+		for (i=0; i<rows; i++){
+			cell = grid.getCell(0, i);
 			side = 3;	//left
-			new Wall(cela, side);
+			new Wall(cell, side);
 		}
 	}
 
 	/* MENU EVENTS */
 	loadLab(data){
-		if(!data.header){
-			console.log("Can't read file");
-			return;
-		}else if(data.header.celes != data.wall.length){
-			console.log("Unsuported file");
-			return;
-		}
-
-		this.quadricula = new Quadricula(data.header.columnes, data.header.files);
-
-		//loadWalls
-		var cela = this.quadricula.cela;
-		var wall = data.wall;
-		for(var i=0; i<wall.length; i++){
-			for(var side=0; side<4; side++){
-				if(wall[i][side] == 1) new Wall(cela[i], side);
-			}
-		}
+		
 	}
 
 	/* CELL EVENTS */
 	computeDirectionPath(path){
-		var columnes = this.quadricula.columnes;
+		var columns = this.grid.columns;
 		var direction, dif;
 		var directionPath = [];
 
@@ -486,9 +465,9 @@ class Model{
 				direction = 1;
 			}else if(dif == -1){
 				direction = 3;
-			}else if(dif == columnes){
+			}else if(dif == columns){
 				direction = 2;
-			}else if(dif == - columnes){
+			}else if(dif == - columns){
 				direction = 0;
 			}
 			directionPath.push(direction);
@@ -498,21 +477,21 @@ class Model{
 	}
 
 	destroyWall(index, side){
-		var cela = this.quadricula.cela;
-		var c = this.quadricula.columnes;
-		cela[index].wall[side] = null;
+		var cell = this.grid.cell;
+		var c = this.grid.columns;
+		cell[index].wall[side] = null;
 		switch(side){
-			case 0: cela[index - c].wall[2] = null; break;
-			case 1: cela[index + 1].wall[3] = null; break;
-			case 2: cela[index + c].wall[0] = null; break;
-			case 3: cela[index - 1].wall[1] = null; break;
+			case 0: cell[index - c].wall[2] = null; break;
+			case 1: cell[index + 1].wall[3] = null; break;
+			case 2: cell[index + c].wall[0] = null; break;
+			case 3: cell[index - 1].wall[1] = null; break;
 		}
 	}
 
 	createPathWalls(path){
 		var directionPath = this.computeDirectionPath(path);
 		var directionChange = [0];
-    	var corner, cela;
+    	var corner, cell;
     	var index, i, p, c, r;
     
 		for(i=1; i<directionPath.length; i++){
@@ -529,18 +508,18 @@ class Model{
 
 		for(i=0; i<path.length; i++){
 			index = path[i];
-			cela = this.quadricula.cela[index];
-			cela.wall = [null, null, null, null];
+			cell = this.grid.cell[index];
+			cell.wall = [null, null, null, null];
 
 			if(directionChange[i] == 0){
 				// Recte
 				if(directionPath[i] % 2 == 0){
 					//Parets Paraleles
-					new Wall(cela, 1);
-					new Wall(cela, 3);
+					new Wall(cell, 1);
+					new Wall(cell, 3);
 				}else if(directionPath[i] % 2 == 1){
-					new Wall(cela, 0);
-					new Wall(cela, 2);
+					new Wall(cell, 0);
+					new Wall(cell, 2);
 				}
 			}else if(directionChange[i] % 2 != 0){
 				// Cantonada
@@ -551,14 +530,14 @@ class Model{
 				if(corner[1] < 0) corner[1] += 4;
 				else if (corner[1] > 3) corner[1] -= 4;
 
-				new Wall(cela, corner[0]);
-				new Wall(cela, corner[1]);
+				new Wall(cell, corner[0]);
+				new Wall(cell, corner[1]);
 			}else if(directionChange[i] % 2 == 0){
 				// Retrocedir
 				p = directionPath[i];
 				for(r=0; r<4; r++){
 					if(p
-					 != r) new Wall(cela, r);
+					 != r) new Wall(cell, r);
 				}
 			}
 		}
@@ -623,20 +602,40 @@ class Controller{
 		document.getElementById("zoom").addEventListener('submit', this.zoom.bind(this), false);
 	}
 
+	ready_grid(){
+		if(arguments.length == 1){
+			// loadLab
+			var data = arguments[0];
+			this.model.grid = new Grid(data.header.columns, data.header.rows);
+
+			var cell = this.model.grid.cell;
+			var wall = data.wall;
+			for(var i=0; i<wall.length; i++){
+				for(var side=0; side<4; side++){
+					if(wall[i][side] == 1) new Wall(cell[i], side);
+				}
+			}
+
+		}else if(arguments.length == 2){
+			// newLab
+			this.model.grid = new Grid(arguments[0], arguments[1]);
+			this.model.loadBorders();
+
+		}else if(arguments.length > 2){
+			console.log("Error: Too much arguments");
+			return;
+		}
+
+		this.view.ready_drawArea(this.model.grid);
+		this.view.draw(this.model);
+		this.ready_cell_events.call(this);
+	}
+
 	newLab(event){
 		this.view.displayOff("modal_newLab");
-
 		var width = parseInt(event.target[0].value);
 		var height = parseInt(event.target[1].value);
-		
-		var model = this.model;
-		model.quadricula = new Quadricula(width, height);
-		model.loadBorders();
-
-		this.view.ready_drawArea(model.quadricula);
-		this.view.draw(model);
-
-		this.ready_cell_events.call(this);
+		this.ready_grid(width, height);
 	}
 
 	loadLab(event){
@@ -654,6 +653,7 @@ class Controller{
 		reader.onload = function(){
 			var content = reader.result;
 			
+			//Read file
 			var regexCeles = /(?<=Celes\: )(\d*)/gm,
 				regexColumnes = /(?<=Columnes\: )(\d*)/gm,
 				regexFiles = /(?<=Files\: )(\d*)/gm,
@@ -664,9 +664,9 @@ class Controller{
 				wall : []
 			};
 			data.header = {
-				celes : regexCeles.exec(content)[0],
-				columnes : regexColumnes.exec(content)[0],
-				files : regexFiles.exec(content)[0]
+				cells : regexCeles.exec(content)[0],
+				columns : regexColumnes.exec(content)[0],
+				rows : regexFiles.exec(content)[0]
 			};
 			var search = regexWalls.exec(content);
 			while(search){
@@ -674,13 +674,14 @@ class Controller{
 				search = regexWalls.exec(content);
 			}
 
-			this.model.loadLab(data);
-
-			this.view.ready_drawArea(this.model.quadricula);
-			this.view.draw(this.model);
-
-			this.ready_cell_events.call(this);
-
+			if(!data.header){
+				console.log("Can't read file");
+				return;
+			}else if(data.header.cells != data.wall.length){
+				console.log("Unsuported file");
+				return;
+			}
+			this.ready_grid(data);
 			event.target.value = "";
 		};
 		reader.onload = reader.onload.bind(this);
@@ -688,23 +689,23 @@ class Controller{
 
 	saveLab(){
 		var text = "";
-		var q = this.model.quadricula;
-		var cela = q.cela;
+		var grid = this.model.grid;
+		var cell = grid.cell;
 
-		text += "#Celes: "+q.numCeles +"\n";
-		text += "#Columnes: "+q.columnes+"\n"; 
-		text += "#Files: "+q.files+"\n\n";
-		for(var i=0; i<q.numCeles; i++){
+		text += "#Celes: "+grid.numCells +"\n";
+		text += "#Columnes: "+grid.columns+"\n"; 
+		text += "#Files: "+grid.rows+"\n\n";
+		for(var i=0; i<grid.numCells; i++){
 			text += "#"+i+": ";
 			for(var s=0; s<4; s++){
-				if (cela[i].wall[s]) text +=  "1";
+				if (cell[i].wall[s]) text +=  "1";
 				else text +=  "0";
 			}
 			text += "\n";
 		}
 		// console.log(text);
 
-		var filename = "Lab_"+ q.columnes +"x"+ q.files +".txt";
+		var filename = "Lab_"+ grid.columns +"x"+ grid.rows +".txt";
 		var element = document.createElement('a');
 		element.setAttribute('href', 'data:text/plain; charset=utf-8,' + encodeURIComponent(text));
 		element.setAttribute('download', filename);
@@ -727,9 +728,7 @@ class Controller{
 			pp.margin = pp.original_margin * percent;
 			pp.wall_stroke = pp.original_wall_stroke * percent;
 
-			this.view.ready_drawArea(this.model.quadricula);
-			this.view.draw(this.model);
-			this.ready_cell_events.call(this);
+			this.ready_grid();
 		}
 	}
 
@@ -764,10 +763,10 @@ class Controller{
 
 	/* CELL EVENTS */
 	ready_cell_events(){
-		var cela = this.model.quadricula.cela;
+		var cell = this.model.grid.cell;
 		var e;
-		for(var i=0; i<cela.length; i++){
-			e = cela[i].element_html;
+		for(var i=0; i<cell.length; i++){
+			e = cell[i].element_html;
 			e.addEventListener("click", this.cellClickEvent.bind(this));
 			e.addEventListener("mousedown", this.cellMousedownEvent.bind(this));
 			e.addEventListener("mouseup", this.cellMouseupEvent.bind(this));

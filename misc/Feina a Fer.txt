@@ -32,6 +32,9 @@ Unificar format dels svg
 Petit programa de càlcul de vectors
 
 
+
+Color de fons es perd en fer scroll
+
 ----------------------------------------------------
 NOVES EINES
 ----------------------------------------------------
