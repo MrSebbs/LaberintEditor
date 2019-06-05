@@ -480,6 +480,12 @@ class Model{
 		var cell = this.grid.cell;
 		var c = this.grid.columns;
 		cell[index].wall[side] = null;
+		
+		if(index < c) return;
+		else if(index >= this.grid.numCells - c) return;
+		else if(index % c == 0) return;
+		else if( (index+1) % c == 0) return;
+
 		switch(side){
 			case 0: cell[index - c].wall[2] = null; break;
 			case 1: cell[index + 1].wall[3] = null; break;
@@ -492,7 +498,7 @@ class Model{
 		var directionPath = this.computeDirectionPath(path);
 		var directionChange = [0];
     	var corner, cell;
-    	var index, i, p, c, r;
+    	var index, side, i, p, c, r;
     
 		for(i=1; i<directionPath.length; i++){
 			directionChange.push(directionPath[i] - directionPath[i-1]);
@@ -500,11 +506,19 @@ class Model{
 		// console.log(directionPath)
 		// console.log(directionChange)
 
-		// primer element
-		p = (directionPath[0] + 2)%4;
-		index = path[0];
-		this.destroyWall(index, p);
+		if(path.length == 1){
+			index = path[0];
+			cell = this.grid.cell[index];
+			cell.wall = [null, null, null, null];
+			for (side = 0; side<4; side++)
+				new Wall(cell, side);
+			return;
+		}
 
+		// primer element
+		index = path[0];
+		p = (directionPath[0] + 2)%4;
+		this.destroyWall(index, p);
 
 		for(i=0; i<path.length; i++){
 			index = path[i];
