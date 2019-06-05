@@ -1,0 +1,11 @@
+ERRORS.txt
+
+newLab
+rang d'entrada max 100x100
+
+problemes de contorn
+primera fila wtf
+primera i última casella
+
+avís quan vols obrir nou laberint
+o fer finestres amb diferents laberints

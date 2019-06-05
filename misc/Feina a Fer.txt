@@ -1,18 +1,6 @@
 
 FEINA A FER
 
-
-----------------------------------------------------
-PRIORITATS
-----------------------------------------------------
-
-Control d'idioma
-Idioma. Tot en anglès
-
-
-Estructurar en fitxers
-
-
 ----------------------------------------------------
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
@@ -32,8 +20,10 @@ Unificar format dels svg
 Petit programa de càlcul de vectors
 
 
-
 Color de fons es perd en fer scroll
+
+Fitxer -> Tancar
+Ha de fer algo
 
 ----------------------------------------------------
 NOVES EINES
@@ -51,6 +41,14 @@ Seleccionar rectangle:
 ALTRES
 ----------------------------------------------------
 
+Estructurar en fitxers
+
 Diagrames
 
 Exceptions
+
+
+----------------------------------------------------
+PRIORITATS
+----------------------------------------------------
+
