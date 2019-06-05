@@ -5,6 +5,13 @@ FEINA A FER
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
+newLab
+rang d'entrada max 100x100
+
+avís quan vols obrir nou laberint
+o fer finestres amb diferents laberints
+
+
 Ctrl + Z:
 new actionStack
 class dins de controller
@@ -49,6 +56,17 @@ Exceptions
 
 
 ----------------------------------------------------
-PRIORITATS
+FUTUR
 ----------------------------------------------------
 
+He d'afegir moltes eines que ja tinc pensades, que només funcionen el llapis i la goma
+
+He de fer un control de les accions per poder fer Ctrl + Z
+
+He de poder exportar el laberint en pdf
+
+Vull posar algoritmes de cerca que resolguin el laberint
+
+Vull aixecar les parets en 3D i ficar-m'hi a dintre
+
+I vull afegir un sistema molt mono de collage d'imatges per donar-li la possibilitat de presentar-lo més agradable a la vista
