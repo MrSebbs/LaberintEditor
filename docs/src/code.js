@@ -333,7 +333,7 @@ class View{
 		};
 
 		interval = setInterval(fadeOutStep, 1000/fps);
-		setTimeout(fadeOutEnd.bind(controller), tmax+500);
+		setTimeout(fadeOutEnd.bind(controller), tmax+100);
 	}
 
 	/* WALLS */
@@ -448,11 +448,6 @@ class Model{
 		}
 	}
 
-	/* MENU EVENTS */
-	loadLab(data){
-		
-	}
-
 	/* CELL EVENTS */
 	computeDirectionPath(path){
 		var columns = this.grid.columns;
@@ -528,7 +523,7 @@ class Model{
 			if(directionChange[i] == 0){
 				// Recte
 				if(directionPath[i] % 2 == 0){
-					//Parets Paraleles
+					// Parets Paraleles
 					new Wall(cell, 1);
 					new Wall(cell, 3);
 				}else if(directionPath[i] % 2 == 1){
@@ -550,8 +545,7 @@ class Model{
 				// Retrocedir
 				p = directionPath[i];
 				for(r=0; r<4; r++){
-					if(p
-					 != r) new Wall(cell, r);
+					if(p != r) new Wall(cell, r);
 				}
 			}
 		}
@@ -574,13 +568,16 @@ class Controller{
 		this.model = new Model();
 		this.view = new View();
 
+		this.actionStack = [];
+		this.mouseIsDown = false;
+		this.changesAreSaved = true;
+
 		this.ready_menu.call(this);
 
 		this.toolbar_left = new Toolbar("tools_left");
 		this.ready_toolbar_left();
 
-		this.actionStack = [];
-		this.mouseIsDown = false;
+		this.closeLab();
 	}
 
 	/* MENU EVENTS */
@@ -588,10 +585,11 @@ class Controller{
 		document.getElementById("newLab").addEventListener('submit', this.newLab.bind(this), false);
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
 		document.getElementById("option_saveLab").addEventListener('click', this.saveLab.bind(this), false);
+		document.getElementById("option_closeLab").addEventListener('click', this.closeLab.bind(this), false);
 
 		this.ready_zoomEvents.call(this);
-		//TODO
-		//loadLab No nomes onchange
+		
+		document.addEventListener('keypress', this.keypressEvent.bind(this), false);
 	}
 
 	ready_zoomEvents(){
@@ -616,10 +614,19 @@ class Controller{
 		document.getElementById("zoom").addEventListener('submit', this.zoom.bind(this), false);
 	}
 
+	confirmQuit(){
+		if(this.model.grid == undefined || this.changesAreSaved){
+			return true;
+		}else{
+			return confirm("Estàs segur que vols tancar aquest Laberint? Els canvis no es guardaran");
+		}
+	}
+
 	ready_grid(){
 		if(arguments.length == 1){
 			// loadLab
 			var data = arguments[0];
+			if( !this.confirmQuit() ) return;
 			this.model.grid = new Grid(data.header.columns, data.header.rows);
 
 			var cell = this.model.grid.cell;
@@ -632,6 +639,7 @@ class Controller{
 
 		}else if(arguments.length == 2){
 			// newLab
+			if( !this.confirmQuit() ) return;
 			this.model.grid = new Grid(arguments[0], arguments[1]);
 			this.model.loadBorders();
 
@@ -640,6 +648,7 @@ class Controller{
 			return;
 		}
 
+		this.changesAreSaved = true;
 		this.view.ready_drawArea(this.model.grid);
 		this.view.draw(this.model);
 		this.ready_cell_events.call(this);
@@ -647,9 +656,9 @@ class Controller{
 
 	newLab(event){
 		this.view.displayOff("modal_newLab");
-		var width = parseInt(event.target[0].value);
-		var height = parseInt(event.target[1].value);
-		this.ready_grid(width, height);
+		var columns = parseInt(event.target[0].value);
+		var rows = parseInt(event.target[1].value);
+		this.ready_grid(columns, rows);
 	}
 
 	loadLab(event){
@@ -668,19 +677,25 @@ class Controller{
 			var content = reader.result;
 			
 			//Read file
-			var regexCeles = /(?<=Celes\: )(\d*)/gm,
-				regexColumnes = /(?<=Columnes\: )(\d*)/gm,
-				regexFiles = /(?<=Files\: )(\d*)/gm,
+			var regexCells = /(?<=Cells\: )(\d*)/gm,
+				regexColumns = /(?<=Columns\: )(\d*)/gm,
+				regexRows = /(?<=Rows\: )(\d*)/gm,
 				regexWalls = /(?<=#\d*: )\d*/gm;
+
+			var resultCells = regexCells.exec(content);
+			if(resultCells == null){
+				console.log("Can't read file");
+				return;
+			}
 
 			var data = {
 				header: {},
 				wall : []
 			};
 			data.header = {
-				cells : regexCeles.exec(content)[0],
-				columns : regexColumnes.exec(content)[0],
-				rows : regexFiles.exec(content)[0]
+				cells : resultCells[0],
+				columns : regexColumns.exec(content)[0],
+				rows : regexRows.exec(content)[0]
 			};
 			var search = regexWalls.exec(content);
 			while(search){
@@ -688,11 +703,8 @@ class Controller{
 				search = regexWalls.exec(content);
 			}
 
-			if(!data.header){
-				console.log("Can't read file");
-				return;
-			}else if(data.header.cells != data.wall.length){
-				console.log("Unsuported file");
+			if(data.header.cells != data.wall.length){
+				console.log("File corrupted");
 				return;
 			}
 			this.ready_grid(data);
@@ -702,13 +714,18 @@ class Controller{
 	}
 
 	saveLab(){
+		this.changesAreSaved = true;
 		var text = "";
 		var grid = this.model.grid;
 		var cell = grid.cell;
+		if(cell.length == 0){
+			console.log("Nothing to save");
+			return;
+		}
 
-		text += "#Celes: "+grid.numCells +"\n";
-		text += "#Columnes: "+grid.columns+"\n"; 
-		text += "#Files: "+grid.rows+"\n\n";
+		text += "#Cells: "+grid.numCells +"\n";
+		text += "#Columns: "+grid.columns+"\n"; 
+		text += "#Rows: "+grid.rows+"\n\n";
 		for(var i=0; i<grid.numCells; i++){
 			text += "#"+i+": ";
 			for(var s=0; s<4; s++){
@@ -727,6 +744,10 @@ class Controller{
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
+	}
+
+	closeLab(){
+		this.ready_grid(0, 0);
 	}
 
 	zoom(event){
@@ -775,6 +796,15 @@ class Controller{
 		this.view.updateCurrentTool(this.toolbar_left);
 	}
 
+	keypressEvent(event){
+		var key = event.code;
+		if(key == "KeyL") this.toolbar_left.setCurrentTool(0);
+		if(key == "KeyG") this.toolbar_left.setCurrentTool(1);
+		if(key == "KeyP") this.toolbar_left.setCurrentTool(2);
+		
+		this.view.updateCurrentTool(this.toolbar_left);
+	}
+
 	/* CELL EVENTS */
 	ready_cell_events(){
 		var cell = this.model.grid.cell;
@@ -809,6 +839,7 @@ class Controller{
 
 	cellMouseupEvent(event){
 		this.mouseIsDown = false;
+		this.changesAreSaved = false;
 		this.view.setPathColor(this.model, event.target.index);
 	
 		// actionStack s'ha de transformar competament

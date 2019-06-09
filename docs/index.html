@@ -3,8 +3,8 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Laberint Editor</title>
-	<link rel="stylesheet" type="text/css" href="src/style/stylesheet.css">
-	<script type="text/javascript" src="src/code/code.js"></script>
+	<link rel="stylesheet" type="text/css" href="src/stylesheet.css">
+	<script type="text/javascript" src="src/code.js"></script>
 </head>
 <body>
 	<header>
@@ -15,7 +15,7 @@
 					<li id="option_newLab"><a href='#'>Nou</a></li>
 					<li id="option_loadLab"><a href='#'>Obrir</a></li>
 					<li id="option_saveLab"><a href='#'>Guardar</a></li>
-					<li><a href='#'>Tancar</a></li>
+					<li id="option_closeLab"><a href='#'>Tancar</a></li>
 				</ul>
 			</li>
 			<li class="dropdown"><span>Edita</span>
@@ -43,8 +43,8 @@
 			<form id="newLab" onsubmit="return false;">
 				<h3>Introdueix les dimensions del nou laberint</h3>
 				</br>
-				<p> Amplada: <input type="number" name="Width" min="1"></p>
-				<p> Alçada: <input type="number" name="Height" min="1"></p>
+				<p> Amplada: <input type="number" name="Columnes" min="1" max="100"></p>
+				<p> Alçada: <input type="number" name="Files" min="1" max="100"></p>
 				<input class="modal_submit" type="submit">
 			</form>
 		</div>
