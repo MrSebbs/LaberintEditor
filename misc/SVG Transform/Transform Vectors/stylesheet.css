@@ -1,0 +1,61 @@
+h1{
+	text-align: center;
+	font-family: Calibri;
+	margin-top: 30px;
+}
+
+#instruccions2{
+	display: none;
+}
+
+
+input{
+	width: 250px;
+	padding: 15px 40px 15px 40px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+	
+	align-items: center;
+	position: relative;
+	
+	font-size: 30px;
+	font-family: Verdana;
+	border-radius: 20px;
+	box-shadow: true;
+
+}
+
+#buttonTransform{
+	background-color: #00CC00;
+}
+
+#buttonDiv{
+	margin: auto;
+	padding: 10px 20px 10px 20px;
+	width: 70%;
+	border: transparent;
+	
+	text-align: center;
+	/*display: block;*/
+}
+
+textarea{
+	margin-top: 50px;
+	margin-bottom: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+#rawText{
+	display: block;
+	margin-top: 10px;
+	margin-bottom: 15px;
+}
+
+#resultCode{
+	display: none;
+	margin-top: 15px;
+}
