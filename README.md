@@ -20,3 +20,5 @@ En preparació:
 - Afegir diversos algoritmes de cerca (BFS, DFS, A* ...) que resolguin el laberint
 
 - Afegir una opció 3D que et permeti "aixecar" les parets i caminar per dins del laberint
+
+- Exportar el Laberint en format PDF o PNG
