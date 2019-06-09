@@ -568,14 +568,16 @@ class Controller{
 		this.model = new Model();
 		this.view = new View();
 
+		this.actionStack = [];
+		this.mouseIsDown = false;
+		this.changesAreSaved = true;
+
 		this.ready_menu.call(this);
 
 		this.toolbar_left = new Toolbar("tools_left");
 		this.ready_toolbar_left();
 
-		this.actionStack = [];
-		this.mouseIsDown = false;
-		this.changesAreSaved = true;
+		this.closeLab();
 	}
 
 	/* MENU EVENTS */
@@ -583,6 +585,7 @@ class Controller{
 		document.getElementById("newLab").addEventListener('submit', this.newLab.bind(this), false);
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
 		document.getElementById("option_saveLab").addEventListener('click', this.saveLab.bind(this), false);
+		document.getElementById("option_closeLab").addEventListener('click', this.closeLab.bind(this), false);
 
 		this.ready_zoomEvents.call(this);
 		//TODO
@@ -715,6 +718,10 @@ class Controller{
 		var text = "";
 		var grid = this.model.grid;
 		var cell = grid.cell;
+		if(cell.length == 0){
+			console.log("Nothing to save");
+			return;
+		}
 
 		text += "#Cells: "+grid.numCells +"\n";
 		text += "#Columns: "+grid.columns+"\n"; 
@@ -737,6 +744,10 @@ class Controller{
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
+	}
+
+	closeLab(){
+		this.ready_grid(0, 0);
 	}
 
 	zoom(event){

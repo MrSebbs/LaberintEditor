@@ -5,10 +5,6 @@ FEINA A FER
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
-Fitxer -> Tancar
-Ha de fer algo
-
-
 Keyboard per navegar per la toolbar
 L -> llapis
 G -> goma
