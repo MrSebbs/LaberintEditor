@@ -2,7 +2,7 @@ Javi Agenjo:
 
 
 Afegir index a HTMLElement:
-celes
+cells
 tools
 Seria millor fer-ho afegint un ID?
 
@@ -14,6 +14,8 @@ defineActions();
 mouseEvent(event){
 	call(this.action[current_tool.index])
 }
+Potser fer-ho així és complicar-se massa la vida,
+Però quan hi hagi moltes tools i moltes actions...
 
 
 
@@ -25,9 +27,10 @@ View: 21 verticals + 21 horitzontals = 42 arrays
 
 
 
-
 Actualitzar Laberint (F5)
 És una bona idea????
+Pel desenvolupador és un rotllo,
+perquè amb F5 vull que la pàgina torni a carregar el codi que acabo de modificar
 
 
 
@@ -38,6 +41,7 @@ Actualitzar Laberint (F5)
 https://jshint.com/
 Do not use 'new' for side effects.
 new Wall
+
 
 
 linode

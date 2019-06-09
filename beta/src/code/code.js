@@ -575,6 +575,7 @@ class Controller{
 
 		this.actionStack = [];
 		this.mouseIsDown = false;
+		this.changesAreSaved = true;
 	}
 
 	/* MENU EVENTS */
@@ -610,10 +611,19 @@ class Controller{
 		document.getElementById("zoom").addEventListener('submit', this.zoom.bind(this), false);
 	}
 
+	confirmQuit(){
+		if(this.model.grid == undefined || this.changesAreSaved){
+			return true;
+		}else{
+			return confirm("Estàs segur que vols tancar aquest Laberint? Els canvis no es guardaran");
+		}
+	}
+
 	ready_grid(){
 		if(arguments.length == 1){
 			// loadLab
 			var data = arguments[0];
+			if( !this.confirmQuit() ) return;
 			this.model.grid = new Grid(data.header.columns, data.header.rows);
 
 			var cell = this.model.grid.cell;
@@ -626,6 +636,7 @@ class Controller{
 
 		}else if(arguments.length == 2){
 			// newLab
+			if( !this.confirmQuit() ) return;
 			this.model.grid = new Grid(arguments[0], arguments[1]);
 			this.model.loadBorders();
 
@@ -634,6 +645,7 @@ class Controller{
 			return;
 		}
 
+		this.changesAreSaved = true;
 		this.view.ready_drawArea(this.model.grid);
 		this.view.draw(this.model);
 		this.ready_cell_events.call(this);
@@ -641,9 +653,9 @@ class Controller{
 
 	newLab(event){
 		this.view.displayOff("modal_newLab");
-		var width = parseInt(event.target[0].value);
-		var height = parseInt(event.target[1].value);
-		this.ready_grid(width, height);
+		var columns = parseInt(event.target[0].value);
+		var rows = parseInt(event.target[1].value);
+		this.ready_grid(columns, rows);
 	}
 
 	loadLab(event){
@@ -699,6 +711,7 @@ class Controller{
 	}
 
 	saveLab(){
+		this.changesAreSaved = true;
 		var text = "";
 		var grid = this.model.grid;
 		var cell = grid.cell;
@@ -806,6 +819,7 @@ class Controller{
 
 	cellMouseupEvent(event){
 		this.mouseIsDown = false;
+		this.changesAreSaved = false;
 		this.view.setPathColor(this.model, event.target.index);
 	
 		// actionStack s'ha de transformar competament

@@ -5,16 +5,8 @@ FEINA A FER
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
-newLab
-rang d'entrada max 100x100
-
-avís quan vols obrir nou laberint
-o fer finestres amb diferents laberints
-
-
-Ctrl + Z:
-new actionStack
-class dins de controller
+Fitxer -> Tancar
+Ha de fer algo
 
 
 Keyboard per navegar per la toolbar
@@ -22,15 +14,18 @@ L -> llapis
 G -> goma
 
 
+Color de fons es perd en fer scroll
+
+
 Imatges SVG de la Toolbar:
 Unificar format dels svg
 Petit programa de càlcul de vectors
 
 
-Color de fons es perd en fer scroll
+Ctrl + Z:
+new actionStack
+class dins de controller
 
-Fitxer -> Tancar
-Ha de fer algo
 
 ----------------------------------------------------
 NOVES EINES
@@ -42,6 +37,8 @@ Seleccionar rectangle:
 	- Goma + Select = Esborrar selecció
 	- Llapis + Select = Marc??
 
+
+Fer finestres amb diferents laberints
 
 
 ----------------------------------------------------
