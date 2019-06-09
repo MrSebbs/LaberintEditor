@@ -1,6 +1,6 @@
-#Celes: 1428
-#Columnes: 42
-#Files: 34
+#Cells: 1428
+#Columns: 42
+#Rows: 34
 
 #0: 1010
 #1: 1010

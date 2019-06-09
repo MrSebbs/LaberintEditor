@@ -1,6 +1,6 @@
-#Celes: 450
-#Columnes: 30
-#Files: 15
+#Cells: 450
+#Columns: 30
+#Rows: 15
 
 #0: 1001
 #1: 1000
