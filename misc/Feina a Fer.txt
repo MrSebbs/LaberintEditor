@@ -5,11 +5,6 @@ FEINA A FER
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
-Keyboard per navegar per la toolbar
-L -> llapis
-G -> goma
-
-
 Color de fons es perd en fer scroll
 
 
