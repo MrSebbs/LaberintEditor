@@ -588,8 +588,8 @@ class Controller{
 		document.getElementById("option_closeLab").addEventListener('click', this.closeLab.bind(this), false);
 
 		this.ready_zoomEvents.call(this);
-		//TODO
-		//loadLab No nomes onchange
+		
+		document.addEventListener('keypress', this.keypressEvent.bind(this), false);
 	}
 
 	ready_zoomEvents(){
@@ -793,6 +793,15 @@ class Controller{
 			}
 		}
 		this.toolbar_left.setCurrentTool(target.index);
+		this.view.updateCurrentTool(this.toolbar_left);
+	}
+
+	keypressEvent(event){
+		var key = event.code;
+		if(key == "KeyL") this.toolbar_left.setCurrentTool(0);
+		if(key == "KeyG") this.toolbar_left.setCurrentTool(1);
+		if(key == "KeyP") this.toolbar_left.setCurrentTool(2);
+		
 		this.view.updateCurrentTool(this.toolbar_left);
 	}
 
