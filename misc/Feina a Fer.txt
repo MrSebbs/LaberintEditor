@@ -22,7 +22,7 @@ L -> llapis
 G -> goma
 
 
-Toolbar:
+Imatges SVG de la Toolbar:
 Unificar format dels svg
 Petit programa de càlcul de vectors
 
