@@ -333,7 +333,7 @@ class View{
 		};
 
 		interval = setInterval(fadeOutStep, 1000/fps);
-		setTimeout(fadeOutEnd.bind(controller), tmax+500);
+		setTimeout(fadeOutEnd.bind(controller), tmax+100);
 	}
 
 	/* WALLS */
@@ -448,11 +448,6 @@ class Model{
 		}
 	}
 
-	/* MENU EVENTS */
-	loadLab(data){
-		
-	}
-
 	/* CELL EVENTS */
 	computeDirectionPath(path){
 		var columns = this.grid.columns;
@@ -528,7 +523,7 @@ class Model{
 			if(directionChange[i] == 0){
 				// Recte
 				if(directionPath[i] % 2 == 0){
-					//Parets Paraleles
+					// Parets Paraleles
 					new Wall(cell, 1);
 					new Wall(cell, 3);
 				}else if(directionPath[i] % 2 == 1){
@@ -550,8 +545,7 @@ class Model{
 				// Retrocedir
 				p = directionPath[i];
 				for(r=0; r<4; r++){
-					if(p
-					 != r) new Wall(cell, r);
+					if(p != r) new Wall(cell, r);
 				}
 			}
 		}
@@ -668,19 +662,25 @@ class Controller{
 			var content = reader.result;
 			
 			//Read file
-			var regexCeles = /(?<=Celes\: )(\d*)/gm,
-				regexColumnes = /(?<=Columnes\: )(\d*)/gm,
-				regexFiles = /(?<=Files\: )(\d*)/gm,
+			var regexCells = /(?<=Cells\: )(\d*)/gm,
+				regexColumns = /(?<=Columns\: )(\d*)/gm,
+				regexRows = /(?<=Rows\: )(\d*)/gm,
 				regexWalls = /(?<=#\d*: )\d*/gm;
+
+			var resultCells = regexCells.exec(content);
+			if(resultCells == null){
+				console.log("Can't read file");
+				return;
+			}
 
 			var data = {
 				header: {},
 				wall : []
 			};
 			data.header = {
-				cells : regexCeles.exec(content)[0],
-				columns : regexColumnes.exec(content)[0],
-				rows : regexFiles.exec(content)[0]
+				cells : resultCells[0],
+				columns : regexColumns.exec(content)[0],
+				rows : regexRows.exec(content)[0]
 			};
 			var search = regexWalls.exec(content);
 			while(search){
@@ -688,11 +688,8 @@ class Controller{
 				search = regexWalls.exec(content);
 			}
 
-			if(!data.header){
-				console.log("Can't read file");
-				return;
-			}else if(data.header.cells != data.wall.length){
-				console.log("Unsuported file");
+			if(data.header.cells != data.wall.length){
+				console.log("File corrupted");
 				return;
 			}
 			this.ready_grid(data);
@@ -706,9 +703,9 @@ class Controller{
 		var grid = this.model.grid;
 		var cell = grid.cell;
 
-		text += "#Celes: "+grid.numCells +"\n";
-		text += "#Columnes: "+grid.columns+"\n"; 
-		text += "#Files: "+grid.rows+"\n\n";
+		text += "#Cells: "+grid.numCells +"\n";
+		text += "#Columns: "+grid.columns+"\n"; 
+		text += "#Rows: "+grid.rows+"\n\n";
 		for(var i=0; i<grid.numCells; i++){
 			text += "#"+i+": ";
 			for(var s=0; s<4; s++){
