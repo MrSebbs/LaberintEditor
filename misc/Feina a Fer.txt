@@ -31,6 +31,11 @@ Seleccionar rectangle:
 
 Fer finestres amb diferents laberints
 
+Girar laberint 90 graus horari/antihorari
+
+Mode Ruta i mode parets
+Mode ruta -> Mode parets = et genera parets automàticament
+Mode parets -> Mode ruta = et dibuixa les rutes automàticament
 
 ----------------------------------------------------
 ALTRES
