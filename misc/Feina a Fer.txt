@@ -1,21 +1,39 @@
 
 FEINA A FER
 
+
+----------------------------------------------------
+PRIORITATS
+----------------------------------------------------
+
+1. Girar laberint 90 graus horari/antihorari
+2. Ponts
+3. Select
+4. Undo
+	Ctrl + Z:
+	new actionStack
+	class dins de controller
+5. Exportar a PDF
+6. Imatge de fons
+7. Flags per interseccions
+	sobreescriure
+	fusionar
+	pont
+	diagonal
+
+A. ALGORITMES DE CERCA
+B. 3D VIEW
+C. VIATGE 3D
+D. SCANNER DE LABERINTS
+
+
 ----------------------------------------------------
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
-Color de fons es perd en fer scroll
-
-
 Imatges SVG de la Toolbar:
 Unificar format dels svg
 Petit programa de càlcul de vectors
-
-
-Ctrl + Z:
-new actionStack
-class dins de controller
 
 
 ----------------------------------------------------
@@ -30,8 +48,6 @@ Seleccionar rectangle:
 
 
 Fer finestres amb diferents laberints
-
-Girar laberint 90 graus horari/antihorari
 
 Mode Ruta i mode parets
 Mode ruta -> Mode parets = et genera parets automàticament

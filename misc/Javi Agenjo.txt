@@ -43,6 +43,8 @@ Do not use 'new' for side effects.
 new Wall
 
 
+vscode -> linter de js
+
 
 linode
 Servidors. Donar-hi un cop d'ull
