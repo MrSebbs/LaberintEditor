@@ -3,6 +3,9 @@ webs de referencia:
 svg editor:
 https://editor.method.ac/
 
+svg from img:
+https://www.pngtosvg.com/
+
 portfolio:
 https://codepen.io/freeCodeCamp/pen/zNBOYG
 

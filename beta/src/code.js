@@ -590,6 +590,8 @@ class Controller{
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
 		document.getElementById("option_saveLab").addEventListener('click', this.saveLab.bind(this), false);
 		document.getElementById("option_closeLab").addEventListener('click', this.closeLab.bind(this), false);
+		document.getElementById("option_rotateRight").addEventListener('click', this.rotate.bind(this), false);
+		document.getElementById("option_rotateLeft").addEventListener('click', this.rotate.bind(this), false);
 
 		this.ready_zoomEvents.call(this);
 		
@@ -752,6 +754,40 @@ class Controller{
 
 	closeLab(){
 		this.ready_grid(0, 0);
+	}
+
+	rotate(event){
+		var oldGrid = this.model.grid;
+		var oldCell = oldGrid.cell;
+		var newGrid = new Grid(oldGrid.rows, oldGrid.columns);
+
+		var r;	// r de rotation. Pot valdre 1 o 3
+		var getIndex;
+		if(event.target.id == "option_rotateRight"){
+			r = 1;
+			// formula = (x%col+1)*row-parseInt(x/col)-1
+			getIndex = function(x){ return (x%oldGrid.columns+1)*oldGrid.rows-parseInt(x/oldGrid.columns)-1; }
+		}else if(event.target.id == "option_rotateLeft"){
+			r = 3;
+			// formula = (col-1-x%col)*row+parseInt(x/col);
+			getIndex = function(x){ return (oldGrid.columns-1-x%oldGrid.columns)*oldGrid.rows+parseInt(x/oldGrid.columns); }
+		}
+		
+		var cell = newGrid.cell;
+		var i, s;
+		for(i=0; i<oldCell.length; i++){
+			for(s=0; s<4; s++){
+				if(oldCell[i].wall[s] != null){
+					// console.log(getIndex(i));
+					new Wall(cell[getIndex(i)], (s+r)%4);
+				}
+			}
+		}
+
+		this.model.grid = newGrid;
+		this.view.ready_drawArea(this.model.grid);
+		this.view.draw(this.model); 
+		this.ready_cell_events.call(this);
 	}
 
 	zoom(event){
