@@ -366,14 +366,15 @@ class View{
 	}
 
 	draw(model){
-		var wall, code_html = "";		//Omplir les dades que passarem a innerHTML
+		var code_html = "";		//Omplir les dades que passarem a innerHTML
 		var cell = model.grid.cell;
-		var i, s;
+		var wall, i, s;
 
+		// Si walls_html esta buit, es reinicia per defecte
 		if (this.walls_html.length == 0)
 			for(i=0; i<cell.length; i++)
 				for(s=0; s<4; s++)
-					this.walls_html.push("");
+					this.walls_html.push("");	// walls_html = ["", "", "", ...]
 		
 		for(i=0; i<cell.length; i++){
 			for(s=0; s<4; s++){
@@ -381,8 +382,8 @@ class View{
 				if(wall == null){
 					this.walls_html[4*i + s] = "";
 					continue;
-				}
-				if(this.walls_html[4*i + s] == ""){
+				}										// No es dibuixen parets dues vegades
+				if(this.walls_html[4*i + s] == ""){		// Comprobar que no l'haguem pintat abans
 					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
 				}
 				code_html += this.walls_html[4*i + s];
@@ -475,11 +476,14 @@ class Model{
 		var cell = this.grid.cell;
 		var c = this.grid.columns;
 		cell[index].wall[side] = null;
-		
-		if(index < c) return;
-		else if(index >= this.grid.numCells - c) return;
-		else if(index % c == 0) return;
-		else if( (index+1) % c == 0) return;
+
+		if(side%2 == 0){			// side 0 i 2 -> sostre i terra
+			if(index < c) return;	// Ignorem la primera fila
+			else if(index >= this.grid.numCells - c) return;	// Ignorem la ultima fila
+		}else if(side%2 == 1){		// side 1 i 3 -> laterals
+			if(index % c == 0) return;				// Ignorem la primera columna
+			else if( (index+1) % c == 0) return;	// Ignorem ultima columna
+		}
 
 		switch(side){
 			case 0: cell[index - c].wall[2] = null; break;
