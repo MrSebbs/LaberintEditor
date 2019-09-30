@@ -1,5 +1,35 @@
 var editor;
 
+class Segment {
+	constructor(x1, y1, x2, y2){
+		this.x1 = x1;
+		this.y1 = y1;
+		this.x2 = x2;
+		this.y2 = y2;
+
+		this.distX;
+		this.distY;
+		this.ortogonal
+	}
+
+	setDist(){
+		this.distX = x2-x1;
+		this.distY = y2-y1;
+
+		if(this.distX < 0) this.distX *= -1;
+		if(this.distY < 0) this.distY *= -1;
+
+		if(distX != 0 && distY != 0) this.ortogonal = false;
+		else this.ortogonal = true;
+	}
+
+	getOrtogonalDist(){
+		if (distX == 0) return distY;
+		else if (distY == 0) return distX;
+		else return false;
+	}
+}
+
 class Color3 {
 	constructor(){
 		var rgb;
@@ -676,47 +706,14 @@ class Controller{
 		}else if(files.length > 1){
 			console.log("Too many files");
 		}
-		var reader = new FileReader();
-		reader.readAsText(files[0]);
-
-		reader.onload = function(){
-			var content = reader.result;
-			
-			//Read file
-			var regexCells = /(?<=Cells\: )(\d*)/gm,
-				regexColumns = /(?<=Columns\: )(\d*)/gm,
-				regexRows = /(?<=Rows\: )(\d*)/gm,
-				regexWalls = /(?<=#\d*: )\d*/gm;
-
-			var resultCells = regexCells.exec(content);
-			if(resultCells == null){
-				console.log("Can't read file");
-				return;
-			}
-
-			var data = {
-				header: {},
-				wall : []
-			};
-			data.header = {
-				cells : resultCells[0],
-				columns : regexColumns.exec(content)[0],
-				rows : regexRows.exec(content)[0]
-			};
-			var search = regexWalls.exec(content);
-			while(search){
-				data.wall.push(search[0]);
-				search = regexWalls.exec(content);
-			}
-
-			if(data.header.cells != data.wall.length){
-				console.log("File corrupted");
-				return;
-			}
-			this.ready_grid(data);
-			event.target.value = "";
-		};
-		reader.onload = reader.onload.bind(this);
+		var file = files[0];
+		var splitFilename = file.name.toLowerCase().split(".");
+		var extension = splitFilename[splitFilename.length-1];
+		if(extension == "txt"){
+			this.importTXT(file);
+		}else if(extension == "svg"){
+			this.importSVG(file);
+		}		
 	}
 
 	saveLab(){
@@ -778,7 +775,6 @@ class Controller{
 		for(i=0; i<oldCell.length; i++){
 			for(s=0; s<4; s++){
 				if(oldCell[i].wall[s] != null){
-					// console.log(getIndex(i));
 					new Wall(cell[getIndex(i)], (s+r)%4);
 				}
 			}
@@ -805,6 +801,55 @@ class Controller{
 
 			this.ready_grid();
 		}
+	}
+
+	/* IMPORT EXTENSIONS */
+	importTXT(file){
+		var reader = new FileReader();
+		reader.readAsText(file);
+
+		reader.onload = function(){
+			var content = reader.result;
+			
+			//Read file
+			var regexCells = /(?<=Cells\: )(\d*)/gm,
+				regexColumns = /(?<=Columns\: )(\d*)/gm,
+				regexRows = /(?<=Rows\: )(\d*)/gm,
+				regexWalls = /(?<=#\d*: )\d*/gm;
+
+			var resultCells = regexCells.exec(content);
+			if(resultCells == null){
+				console.log("Can't read file");
+				return;
+			}
+
+			var data = {
+				header: {},
+				wall : []
+			};
+			data.header = {
+				cells : resultCells[0],
+				columns : regexColumns.exec(content)[0],
+				rows : regexRows.exec(content)[0]
+			};
+			var search = regexWalls.exec(content);
+			while(search){
+				data.wall.push(search[0]);
+				search = regexWalls.exec(content);
+			}
+
+			if(data.header.cells != data.wall.length){
+				console.log("File corrupted");
+				return;
+			}
+			this.ready_grid(data);
+			event.target.value = "";
+		};
+		reader.onload = reader.onload.bind(this);
+	}
+
+	importSVG(file){
+		console.log("importSVG");
 	}
 
 	/* TOOLBAR EVENTS */
