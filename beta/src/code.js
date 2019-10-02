@@ -1,31 +1,59 @@
 var editor;
 
 class Segment {
-	constructor(x1, y1, x2, y2){
-		this.x1 = x1;
-		this.y1 = y1;
-		this.x2 = x2;
-		this.y2 = y2;
+	constructor(){
+		this.x1;
+		this.y1;
+		this.x2;
+		this.y2;
 
 		this.distX;
 		this.distY;
-		this.ortogonal
+
+		this.horitzontal = false;
+		this.vertical = false;
+		this.ortogonal;
+
+		if(arguments.length == 1){
+			var vector = arguments[0].match(/\w\d="(\d*)"/gim);
+			var value;
+			if(vector.length != 4){
+				console.log("Error in new Segment");
+				return;
+			}
+
+			for(var i=0; i<4; i++){
+				value = vector[i].split(/=?"/);
+				this[value[0]] = parseInt( value[1] );
+			}
+			this.setDist();
+
+		}else if(arguments.length == 4){
+			var v = arguments;
+			this.x1 = v[0];
+			this.y1 = v[1];
+			this.x2 = v[2];
+			this.y2 = v[3];
+		}
 	}
 
 	setDist(){
-		this.distX = x2-x1;
-		this.distY = y2-y1;
+		this.distX = this.x2-this.x1;
+		this.distY = this.y2-this.y1;
 
 		if(this.distX < 0) this.distX *= -1;
 		if(this.distY < 0) this.distY *= -1;
 
-		if(distX != 0 && distY != 0) this.ortogonal = false;
+		if(this.distX == 0) this.vertical = true;
+		if(this.distY == 0) this.horitzontal = true;
+		
+		if(!this.horitzontal && !this.vertical) this.ortogonal = false;
 		else this.ortogonal = true;
 	}
 
 	getOrtogonalDist(){
-		if (distX == 0) return distY;
-		else if (distY == 0) return distX;
+		if (this.distX == 0) return this.distY;
+		else if (this.distY == 0) return this.distX;
 		else return false;
 	}
 }
@@ -659,7 +687,7 @@ class Controller{
 	}
 
 	ready_grid(){
-		if(arguments.length == 1){
+		if(arguments.length == 1 && arguments[0].hasOwnProperty("header")){
 			// loadLab
 			var data = arguments[0];
 			if( !this.confirmQuit() ) return;
@@ -672,6 +700,10 @@ class Controller{
 					if(wall[i][side] == 1) new Wall(cell[i], side);
 				}
 			}
+
+		}else if(arguments.length == 1){
+
+
 
 		}else if(arguments.length == 2){
 			// newLab
@@ -699,6 +731,8 @@ class Controller{
 
 	loadLab(event){
 		this.view.displayOff("modal_loadLab");
+		if( !this.confirmQuit() ) return;
+
 		var files = event.target.files;
 		if (!files[0]) {
 			console.log("File not found");
@@ -710,10 +744,11 @@ class Controller{
 		var splitFilename = file.name.toLowerCase().split(".");
 		var extension = splitFilename[splitFilename.length-1];
 		if(extension == "txt"){
-			this.importTXT(file);
+			this.importTXT(file, event);
 		}else if(extension == "svg"){
-			this.importSVG(file);
-		}		
+			this.importSVG(file, event);
+		}
+		event.target.value = "";
 	}
 
 	saveLab(){
@@ -804,10 +839,8 @@ class Controller{
 	}
 
 	/* IMPORT EXTENSIONS */
-	importTXT(file){
+	importTXT(file, event){
 		var reader = new FileReader();
-		reader.readAsText(file);
-
 		reader.onload = function(){
 			var content = reader.result;
 			
@@ -843,13 +876,144 @@ class Controller{
 				return;
 			}
 			this.ready_grid(data);
-			event.target.value = "";
 		};
 		reader.onload = reader.onload.bind(this);
+		
+		reader.readAsText(file);
 	}
 
-	importSVG(file){
-		console.log("importSVG");
+	importSVG(file, event){
+		var reader = new FileReader();
+		reader.onload = function(){
+			var content = reader.result;
+			var regexSVG = /<svg([\s\S]*?)\/svg>/gim,
+				regexLines = /<line([\s\S]*?)\/>/gim;
+
+			var resultSVG = content.match(regexSVG);
+			if(resultSVG.length == 0){
+				console.log("Can't read file");
+				return;
+			}
+
+			var resultLines = resultSVG[0].match(regexLines);
+			var walls = [];
+			var i;
+			for(i=0; i<resultLines.length; i++){
+				walls.push( new Segment(resultLines[i]) );
+			}
+			
+			var xMax = 0, yMax = 0;
+			var xMin = walls[0].x1, yMin = walls[0].y2;
+			var x1, x2, y1, y2, svgWall;
+
+			var distNotMultiple = [];
+			var dist = walls[0].getOrtogonalDist();
+			var distMin = dist;
+			
+			// Recorrem walls[Segment1, Segment2, ...]
+			for(i=1; i<walls.length; i++){
+				svgWall = walls[i];
+				x1 = svgWall.x1;
+				x2 = svgWall.x2;
+				y1 = svgWall.y1;
+				y2 = svgWall.y2;
+
+				if(xMin > x1) xMin = x1;
+				if(xMin > x2) xMin = x2;
+				if(yMin > y1) yMin = y1;
+				if(yMin > y2) yMin = y2;
+
+				if(xMax < x1) xMax = x1;
+				if(xMax < x2) xMax = x2;
+				if(yMax < y1) yMax = y1;
+				if(yMax < y2) yMax = y2;
+
+				// Busquem el Segment més curt
+				dist = svgWall.getOrtogonalDist();
+				if (distMin > dist){
+					distMin = dist;
+					var j;
+					for(j=0; j<distNotMultiple.length; j++){
+						dist = distNotMultiple[j];
+						if(dist%distMin == 0) distNotMultiple.splice(j, 1);
+					}
+				}
+				else if(dist%distMin == 0) continue;
+				else if(walls.includes(dist)) continue;
+				else distNotMultiple.push(dist);
+			}
+
+			if(distNotMultiple.length != 0){
+				console.log("Values not working:\n");
+				console.log(distNotMultiple);
+			}
+
+			var columns, rows;
+			if( (xMax-xMin)%distMin == 0 ) columns = (xMax - xMin)/distMin;
+			if( (yMax-yMin)%distMin == 0 ) rows = (yMax - yMin)/distMin;
+
+			var t = 0;
+
+			this.model.grid = new Grid(columns, rows);
+
+			var cell = this.model.grid.cell;
+			var x, y, first, last, side, svgWall;
+
+			for(i=0; i<walls.length; i++){
+				svgWall = walls[i];
+				if(svgWall.horitzontal){
+					y = (svgWall.y1 - yMin)/distMin;
+					side = 0;
+
+					first = (svgWall.x1 - xMin)/distMin;
+					last = (svgWall.x2 - xMin)/distMin;
+					if(first > last){
+						var aux = first;
+						first = last;
+						last = aux;
+					}
+
+					if(rows == y){
+						y--;
+						side = 2;
+					}
+					for(x=first; x<last; x++){
+						console.log("Cell: "+[x+y*columns]+", Side: "+side)
+						new Wall(cell[x+y*columns], side);				
+					}
+				}else if(svgWall.vertical){
+					x = (svgWall.x1 - xMin)/distMin;
+					side = 3;
+
+					first = (svgWall.y1 - yMin)/distMin;
+					last = (svgWall.y2 - yMin)/distMin;
+					if(first > last){
+						var aux = first;
+						first = last;
+						last = aux;
+					}
+					
+					if(columns == x){
+						x--;
+						side = 1;
+					}
+					for(y=first; y<last; y++){
+						console.log("Cell: "+[x+y*columns]+", Side: "+side)
+						new Wall(cell[x+y*columns], side);				
+					}
+				}
+			}
+
+
+			// this.ready_grid();
+			this.changesAreSaved = true;
+			this.view.ready_drawArea(this.model.grid);
+			this.view.draw(this.model);
+			this.ready_cell_events.call(this);
+
+		};
+		reader.onload = reader.onload.bind(this);
+		reader.readAsText(file);
 	}
 
 	/* TOOLBAR EVENTS */
