@@ -687,35 +687,6 @@ class Controller{
 	}
 
 	ready_grid(){
-		if(arguments.length == 1 && arguments[0].hasOwnProperty("header")){
-			// loadLab
-			var data = arguments[0];
-			if( !this.confirmQuit() ) return;
-			this.model.grid = new Grid(data.header.columns, data.header.rows);
-
-			var cell = this.model.grid.cell;
-			var wall = data.wall;
-			for(var i=0; i<wall.length; i++){
-				for(var side=0; side<4; side++){
-					if(wall[i][side] == 1) new Wall(cell[i], side);
-				}
-			}
-
-		}else if(arguments.length == 1){
-
-
-
-		}else if(arguments.length == 2){
-			// newLab
-			if( !this.confirmQuit() ) return;
-			this.model.grid = new Grid(arguments[0], arguments[1]);
-			this.model.loadBorders();
-
-		}else if(arguments.length > 2){
-			console.log("Error: Too much arguments");
-			return;
-		}
-
 		this.changesAreSaved = true;
 		this.view.ready_drawArea(this.model.grid);
 		this.view.draw(this.model);
@@ -724,14 +695,16 @@ class Controller{
 
 	newLab(event){
 		this.view.displayOff("modal_newLab");
+		if( !this.confirmQuit() ) return;
 		var columns = parseInt(event.target[0].value);
 		var rows = parseInt(event.target[1].value);
-		this.ready_grid(columns, rows);
+		this.model.grid = new Grid(columns, rows);
+		this.model.loadBorders();
+		this.ready_grid();
 	}
 
 	loadLab(event){
 		this.view.displayOff("modal_loadLab");
-		if( !this.confirmQuit() ) return;
 
 		var files = event.target.files;
 		if (!files[0]) {
@@ -741,14 +714,18 @@ class Controller{
 			console.log("Too many files");
 		}
 		var file = files[0];
+		event.target.value = "";
+		if( !this.confirmQuit() ) return;
+
 		var splitFilename = file.name.toLowerCase().split(".");
 		var extension = splitFilename[splitFilename.length-1];
 		if(extension == "txt"){
-			this.importTXT(file, event);
+			this.importTXT(file);
 		}else if(extension == "svg"){
-			this.importSVG(file, event);
+			this.importSVG(file);
+		}else{
+			console.log("Unsuported File");
 		}
-		event.target.value = "";
 	}
 
 	saveLab(){
@@ -785,7 +762,9 @@ class Controller{
 	}
 
 	closeLab(){
-		this.ready_grid(0, 0);
+		if( !this.confirmQuit() ) return;
+		this.model.grid = new Grid(0, 0);
+		this.ready_grid()
 	}
 
 	rotate(event){
@@ -839,7 +818,7 @@ class Controller{
 	}
 
 	/* IMPORT EXTENSIONS */
-	importTXT(file, event){
+	importTXT(file){
 		var reader = new FileReader();
 		reader.onload = function(){
 			var content = reader.result;
@@ -875,14 +854,23 @@ class Controller{
 				console.log("File corrupted");
 				return;
 			}
-			this.ready_grid(data);
+
+			this.model.grid = new Grid(data.header.columns, data.header.rows);
+			var cell = this.model.grid.cell;
+			var wall = data.wall;
+			var i, side;
+			for(i=0; i<wall.length; i++){
+				for(side=0; side<4; side++){
+					if(wall[i][side] == 1) new Wall(cell[i], side);
+				}
+			}
+			this.ready_grid();
 		};
 		reader.onload = reader.onload.bind(this);
-		
 		reader.readAsText(file);
 	}
 
-	importSVG(file, event){
+	importSVG(file){
 		var reader = new FileReader();
 		reader.onload = function(){
 			var content = reader.result;
@@ -952,7 +940,7 @@ class Controller{
 			if( (xMax-xMin)%distMin == 0 ) columns = (xMax - xMin)/distMin;
 			if( (yMax-yMin)%distMin == 0 ) rows = (yMax - yMin)/distMin;
 
-			var t = 0;
+			var t = 0;	//Aixo es pot esborrar?
 
 			this.model.grid = new Grid(columns, rows);
 
@@ -972,13 +960,11 @@ class Controller{
 						first = last;
 						last = aux;
 					}
-
 					if(rows == y){
 						y--;
 						side = 2;
 					}
 					for(x=first; x<last; x++){
-						console.log("Cell: "+[x+y*columns]+", Side: "+side)
 						new Wall(cell[x+y*columns], side);				
 					}
 				}else if(svgWall.vertical){
@@ -992,25 +978,16 @@ class Controller{
 						first = last;
 						last = aux;
 					}
-					
 					if(columns == x){
 						x--;
 						side = 1;
 					}
 					for(y=first; y<last; y++){
-						console.log("Cell: "+[x+y*columns]+", Side: "+side)
 						new Wall(cell[x+y*columns], side);				
 					}
 				}
 			}
-
-
-			// this.ready_grid();
-			this.changesAreSaved = true;
-			this.view.ready_drawArea(this.model.grid);
-			this.view.draw(this.model);
-			this.ready_cell_events.call(this);
-
+			this.ready_grid();
 		};
 		reader.onload = reader.onload.bind(this);
 		reader.readAsText(file);
