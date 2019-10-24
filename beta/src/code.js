@@ -154,6 +154,159 @@ class Toolbar {
 	}
 }
 
+class LongWallManager {
+	constructor(grid){
+		this.horitzontal;
+		this.vertical;
+
+		this.rows = grid.rows;
+		this.cols = grid.columns;
+	}
+
+	toString(walls){
+		var line, index, n;
+		var str = "";
+		for(index=0; index<walls.length; index++){
+			line = walls[index];
+			str += "Line "+index+":";
+			for(n=0; n<line.length; n++){
+				str += " ["+line[n][0]+"-"+line[n][1]+"]";
+			}
+			str += "\n";
+		}
+		console.log(str);
+	}
+
+	fillLinesWithWalls(model){
+		var cell = model.grid.cell;
+		var index, i, j;
+
+		// Recorrem cells en horitzontal
+		// Omplim horitzontal
+		this.horitzontal = [[]]
+		for(j=0; j<this.rows; j++){
+			this.horitzontal.push([]);
+			for(i=0; i<this.cols; i++){
+				index = i+j*this.cols;
+				if(cell[index].wall[0] != null)
+					this.horitzontal[j].push(i);
+				if(cell[index].wall[2] != null)
+					this.horitzontal[j+1].push(i);
+			}
+		}
+
+		// Recorrem cells en vertical
+		// Omplim vertical
+		this.vertical = [[]]
+		for(i=0; i<this.cols; i++){
+			this.vertical.push([]);
+			for(j=0; j<this.rows; j++){
+				index = i+j*this.cols;
+				if(cell[index].wall[3] != null)
+					this.vertical[i].push(j);
+				if(cell[index].wall[1] != null)
+					this.vertical[i+1].push(j);
+			}
+		}
+	}
+
+	weldWalls(walls){
+		var i, index, line;
+		var n, nums, found;
+		var first, last;
+		// Input => line = [0, 1, 2, 5, 7, 8, 0, 1, 3]
+		// Output => line = [[0,3], [5], [7,8]]
+		
+		for(i=0; i<walls.length; i++){
+			line = walls[i];
+			n = 0;
+			nums = [];
+			found = false;
+			while(line.length > 0){
+				index = line.indexOf(n);
+				if(index > -1){
+					if(!found){
+						first = n;
+						found = true;
+					}
+					line.splice(index, 1);
+					// Pot ser que n estigui duplicat!
+					index = line.indexOf(n);
+					if(index > -1) line.splice(index, 1);
+				}else{
+					if(found){
+						last = n-1;
+						nums.push([first, last]);
+						found = false;
+					}
+				}
+				n++;
+			}
+			if(found){
+				last = n-1;
+				nums.push([first, last]);
+				found = false;
+			}
+			walls[i] = nums;
+		}
+	}
+
+	update(model){
+		this.fillLinesWithWalls(model);
+		this.weldWalls(this.horitzontal);
+		this.weldWalls(this.vertical);
+	}
+
+	getCodeHtml(properties){
+		var orientation, i;
+		var code_html = "";
+		var walls = [this.horitzontal, this.vertical];
+
+		for(orientation=0; orientation<2; orientation++){
+			for(i=0; i<walls[orientation].length; i++){
+				code_html += this.getLongWallCodeHtml(properties, orientation, i);
+			}
+		}
+		return code_html;
+	}
+
+	getLongWallCodeHtml(pp, orientation, index){
+		var code_html = "";
+		var line;
+		if(orientation) line = this.vertical[index];
+		else line = this.horitzontal[index];
+
+		var n;
+		for(n=0; n<line.length; n++){
+			// Aquí fem tota la line
+			// Suposem wall horitzontal
+			var intWidth = line[n][1] - line[n][0] + 1;
+
+			var x = line[n][0] * pp.side_length + pp.margin - pp.wall_stroke;
+			var y = index * pp.side_length + pp.margin - pp.wall_stroke;
+			var width = intWidth * pp.side_length + 2 * pp.wall_stroke;
+			var height = 2 * pp.wall_stroke;
+			
+			// Si és vertical ho arreglem
+			if(orientation){
+				var aux = x;
+				x = y;
+				y = aux;
+
+				aux = width;
+				width = height;
+				height = aux;
+			}
+
+			code_html += "<rect width=\""+ width +
+				"\" height=\""+ height +
+				"\" fill=\""+ pp.wallFillColor +
+				"\" x=\""+ x +"\" y=\""+ y +"\"></rect>\n";
+		}
+		return code_html;
+	}
+}
+
 class Wall {
 	constructor(cell, side){
 		this.cell = cell;
@@ -183,7 +336,6 @@ class Grid {
 		this.rows = parseInt(rows);
 		this.numCells = columns * rows;
 		this.cell = [];
-		this.wall = [];
 
 		this.drawArea;
 		this.loadCells();
@@ -230,6 +382,7 @@ class View{
 
 		};
 
+		this.longWall;
 		this.walls_html = [];
 		this.ready_modals();
 	}
@@ -325,6 +478,9 @@ class View{
 
 		/* reset walls */
 		this.walls_html = [];
+
+		/* create LongWallManager */
+		this.longWall = new LongWallManager(grid);
 	}
 
 	setDefaultCellStyle(cell, pp){
@@ -424,7 +580,19 @@ class View{
 	}
 
 	draw(model){
-		var code_html = "";		//Omplir les dades que passarem a innerHTML
+		this.longWall.update(model);
+		this.DOM_walls.innerHTML = this.longWall.getCodeHtml(this.properties);
+		this.walls_html = [];
+
+		// Time control
+		// var start = Date.now();
+		// console.log(Date.now() - start);
+	}
+
+	draw_old(model){
+		var start = Date.now();
+
+		var code_html = "";		//Hem d'omplir les dades que passarem a innerHTML
 		var cell = model.grid.cell;
 		var wall, i, s;
 
@@ -440,7 +608,7 @@ class View{
 				if(wall == null){
 					this.walls_html[4*i + s] = "";
 					continue;
-				}										// No es dibuixen parets dues vegades
+				}										// Si que es dibuixen parets dues vegades
 				if(this.walls_html[4*i + s] == ""){		// Comprobar que no l'haguem pintat abans
 					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
 				}
@@ -448,6 +616,8 @@ class View{
 			}
 		}
 		this.DOM_walls.innerHTML = code_html;
+
+		console.log(Date.now() - start);
 	}
 }
 
@@ -532,22 +702,26 @@ class Model{
 
 	destroyWall(index, side){
 		var cell = this.grid.cell;
-		var c = this.grid.columns;
+		var cols = this.grid.columns;
 		cell[index].wall[side] = null;
 
-		if(side%2 == 0){			// side 0 i 2 -> sostre i terra
-			if(index < c) return;	// Ignorem la primera fila
-			else if(index >= this.grid.numCells - c) return;	// Ignorem la ultima fila
-		}else if(side%2 == 1){		// side 1 i 3 -> laterals
-			if(index % c == 0) return;				// Ignorem la primera columna
-			else if( (index+1) % c == 0) return;	// Ignorem ultima columna
-		}
-
 		switch(side){
-			case 0: cell[index - c].wall[2] = null; break;
-			case 1: cell[index + 1].wall[3] = null; break;
-			case 2: cell[index + c].wall[0] = null; break;
-			case 3: cell[index - 1].wall[1] = null; break;
+			case 0:
+				if(index < cols) return; // Ignorem la primera fila
+				cell[index - cols].wall[2] = null;
+				break;
+			case 1:
+				if( (index+1) % cols == 0) return;	// Ignorem ultima columna
+				cell[index + 1].wall[3] = null;
+				break;
+			case 2:
+				if(index >= this.grid.numCells - cols) return;	// Ignorem la ultima fila
+				cell[index + cols].wall[0] = null;
+				break;
+			case 3:
+				if(index % cols == 0) return;				// Ignorem la primera columna
+				cell[index - 1].wall[1] = null;
+				break;
 		}
 	}
 
