@@ -8,6 +8,9 @@ PRIORITATS
 
 1. Girar laberint 90 graus horari/antihorari
 2. Ponts
+	svg -> model
+	model -> svg
+	model -> draw
 3. Select
 4. Undo
 	Ctrl + Z:
@@ -20,6 +23,7 @@ PRIORITATS
 	fusionar
 	pont
 	diagonal
+8. Entrada i meta
 
 A. ALGORITMES DE CERCA
 B. 3D VIEW
@@ -30,6 +34,15 @@ D. SCANNER DE LABERINTS
 ----------------------------------------------------
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
+
+Reader.onload convertir-ho al meu sistema d'events
+importTXT és molt feo. Arreglar regexs
+
+Path of Walls:
+	Primer element esborra paret
+	Últim element NO SEMPRE esborra paret
+
+Transform model abans de view.draw perquè s'eliminin les parets repetides
 
 Imatges SVG de la Toolbar:
 Unificar format dels svg
