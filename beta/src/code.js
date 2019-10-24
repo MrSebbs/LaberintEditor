@@ -383,7 +383,6 @@ class View{
 		};
 
 		this.longWall;
-		this.walls_html = [];
 		this.ready_modals();
 	}
 
@@ -475,9 +474,6 @@ class View{
 			cell.element_html = this.DOM_grid.children[i];
 			this.setDefaultCellStyle(cell, pp);
 		}
-
-		/* reset walls */
-		this.walls_html = [];
 
 		/* create LongWallManager */
 		this.longWall = new LongWallManager(grid);
@@ -582,7 +578,6 @@ class View{
 	draw(model){
 		this.longWall.update(model);
 		this.DOM_walls.innerHTML = this.longWall.getCodeHtml(this.properties);
-		this.walls_html = [];
 
 		// Time control
 		// var start = Date.now();
