@@ -154,6 +154,14 @@ class Toolbar {
 	}
 }
 
+class Wall {
+	constructor(cell, side){
+		this.cell = cell;
+		this.side = side;
+		this.cell.wall[side] = this;
+	}
+}
+
 class LongWallManager {
 	constructor(grid){
 		this.horitzontal;
@@ -304,14 +312,6 @@ class LongWallManager {
 				"\" x=\""+ x +"\" y=\""+ y +"\"></rect>\n";
 		}
 		return code_html;
-	}
-}
-
-class Wall {
-	constructor(cell, side){
-		this.cell = cell;
-		this.side = side;
-		this.cell.wall[side] = this;
 	}
 }
 
