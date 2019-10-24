@@ -1,5 +1,63 @@
 var editor;
 
+class Segment {
+	constructor(){
+		this.x1;
+		this.y1;
+		this.x2;
+		this.y2;
+
+		this.distX;
+		this.distY;
+
+		this.horitzontal = false;
+		this.vertical = false;
+		this.ortogonal;
+
+		if(arguments.length == 1){
+			var vector = arguments[0].match(/\w\d="(\d*)"/gim);
+			var value;
+			if(vector.length != 4){
+				console.log("Error in new Segment");
+				return;
+			}
+
+			for(var i=0; i<4; i++){
+				value = vector[i].split(/=?"/);
+				this[value[0]] = parseInt( value[1] );
+			}
+			this.setDist();
+
+		}else if(arguments.length == 4){
+			var v = arguments;
+			this.x1 = v[0];
+			this.y1 = v[1];
+			this.x2 = v[2];
+			this.y2 = v[3];
+		}
+	}
+
+	setDist(){
+		this.distX = this.x2-this.x1;
+		this.distY = this.y2-this.y1;
+
+		if(this.distX < 0) this.distX *= -1;
+		if(this.distY < 0) this.distY *= -1;
+
+		if(this.distX == 0) this.vertical = true;
+		if(this.distY == 0) this.horitzontal = true;
+		
+		if(!this.horitzontal && !this.vertical) this.ortogonal = false;
+		else this.ortogonal = true;
+	}
+
+	getOrtogonalDist(){
+		if (this.distX == 0) return this.distY;
+		else if (this.distY == 0) return this.distX;
+		else return false;
+	}
+}
+
 class Color3 {
 	constructor(){
 		var rgb;
@@ -96,6 +154,159 @@ class Toolbar {
 	}
 }
 
+class LongWallManager {
+	constructor(grid){
+		this.horitzontal;
+		this.vertical;
+
+		this.rows = grid.rows;
+		this.cols = grid.columns;
+	}
+
+	toString(walls){
+		var line, index, n;
+		var str = "";
+		for(index=0; index<walls.length; index++){
+			line = walls[index];
+			str += "Line "+index+":";
+			for(n=0; n<line.length; n++){
+				str += " ["+line[n][0]+"-"+line[n][1]+"]";
+			}
+			str += "\n";
+		}
+		console.log(str);
+	}
+
+	fillLinesWithWalls(model){
+		var cell = model.grid.cell;
+		var index, i, j;
+
+		// Recorrem cells en horitzontal
+		// Omplim horitzontal
+		this.horitzontal = [[]]
+		for(j=0; j<this.rows; j++){
+			this.horitzontal.push([]);
+			for(i=0; i<this.cols; i++){
+				index = i+j*this.cols;
+				if(cell[index].wall[0] != null)
+					this.horitzontal[j].push(i);
+				if(cell[index].wall[2] != null)
+					this.horitzontal[j+1].push(i);
+			}
+		}
+
+		// Recorrem cells en vertical
+		// Omplim vertical
+		this.vertical = [[]]
+		for(i=0; i<this.cols; i++){
+			this.vertical.push([]);
+			for(j=0; j<this.rows; j++){
+				index = i+j*this.cols;
+				if(cell[index].wall[3] != null)
+					this.vertical[i].push(j);
+				if(cell[index].wall[1] != null)
+					this.vertical[i+1].push(j);
+			}
+		}
+	}
+
+	weldWalls(walls){
+		var i, index, line;
+		var n, nums, found;
+		var first, last;
+		// Input => line = [0, 1, 2, 5, 7, 8, 0, 1, 3]
+		// Output => line = [[0,3], [5], [7,8]]
+		
+		for(i=0; i<walls.length; i++){
+			line = walls[i];
+			n = 0;
+			nums = [];
+			found = false;
+			while(line.length > 0){
+				index = line.indexOf(n);
+				if(index > -1){
+					if(!found){
+						first = n;
+						found = true;
+					}
+					line.splice(index, 1);
+					// Pot ser que n estigui duplicat!
+					index = line.indexOf(n);
+					if(index > -1) line.splice(index, 1);
+				}else{
+					if(found){
+						last = n-1;
+						nums.push([first, last]);
+						found = false;
+					}
+				}
+				n++;
+			}
+			if(found){
+				last = n-1;
+				nums.push([first, last]);
+				found = false;
+			}
+			walls[i] = nums;
+		}
+	}
+
+	update(model){
+		this.fillLinesWithWalls(model);
+		this.weldWalls(this.horitzontal);
+		this.weldWalls(this.vertical);
+	}
+
+	getCodeHtml(properties){
+		var orientation, i;
+		var code_html = "";
+		var walls = [this.horitzontal, this.vertical];
+
+		for(orientation=0; orientation<2; orientation++){
+			for(i=0; i<walls[orientation].length; i++){
+				code_html += this.getLongWallCodeHtml(properties, orientation, i);
+			}
+		}
+		return code_html;
+	}
+
+	getLongWallCodeHtml(pp, orientation, index){
+		var code_html = "";
+		var line;
+		if(orientation) line = this.vertical[index];
+		else line = this.horitzontal[index];
+
+		var n;
+		for(n=0; n<line.length; n++){
+			// Aquí fem tota la line
+			// Suposem wall horitzontal
+			var intWidth = line[n][1] - line[n][0] + 1;
+
+			var x = line[n][0] * pp.side_length + pp.margin - pp.wall_stroke;
+			var y = index * pp.side_length + pp.margin - pp.wall_stroke;
+			var width = intWidth * pp.side_length + 2 * pp.wall_stroke;
+			var height = 2 * pp.wall_stroke;
+			
+			// Si és vertical ho arreglem
+			if(orientation){
+				var aux = x;
+				x = y;
+				y = aux;
+
+				aux = width;
+				width = height;
+				height = aux;
+			}
+
+			code_html += "<rect width=\""+ width +
+				"\" height=\""+ height +
+				"\" fill=\""+ pp.wallFillColor +
+				"\" x=\""+ x +"\" y=\""+ y +"\"></rect>\n";
+		}
+		return code_html;
+	}
+}
+
 class Wall {
 	constructor(cell, side){
 		this.cell = cell;
@@ -125,7 +336,6 @@ class Grid {
 		this.rows = parseInt(rows);
 		this.numCells = columns * rows;
 		this.cell = [];
-		this.wall = [];
 
 		this.drawArea;
 		this.loadCells();
@@ -172,7 +382,7 @@ class View{
 
 		};
 
-		this.walls_html = [];
+		this.longWall;
 		this.ready_modals();
 	}
 
@@ -265,8 +475,8 @@ class View{
 			this.setDefaultCellStyle(cell, pp);
 		}
 
-		/* reset walls */
-		this.walls_html = [];
+		/* create LongWallManager */
+		this.longWall = new LongWallManager(grid);
 	}
 
 	setDefaultCellStyle(cell, pp){
@@ -366,7 +576,18 @@ class View{
 	}
 
 	draw(model){
-		var code_html = "";		//Omplir les dades que passarem a innerHTML
+		this.longWall.update(model);
+		this.DOM_walls.innerHTML = this.longWall.getCodeHtml(this.properties);
+
+		// Time control
+		// var start = Date.now();
+		// console.log(Date.now() - start);
+	}
+
+	draw_old(model){
+		var start = Date.now();
+
+		var code_html = "";		//Hem d'omplir les dades que passarem a innerHTML
 		var cell = model.grid.cell;
 		var wall, i, s;
 
@@ -382,7 +603,7 @@ class View{
 				if(wall == null){
 					this.walls_html[4*i + s] = "";
 					continue;
-				}										// No es dibuixen parets dues vegades
+				}										// Si que es dibuixen parets dues vegades
 				if(this.walls_html[4*i + s] == ""){		// Comprobar que no l'haguem pintat abans
 					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
 				}
@@ -390,6 +611,8 @@ class View{
 			}
 		}
 		this.DOM_walls.innerHTML = code_html;
+
+		console.log(Date.now() - start);
 	}
 }
 
@@ -474,22 +697,26 @@ class Model{
 
 	destroyWall(index, side){
 		var cell = this.grid.cell;
-		var c = this.grid.columns;
+		var cols = this.grid.columns;
 		cell[index].wall[side] = null;
 
-		if(side%2 == 0){			// side 0 i 2 -> sostre i terra
-			if(index < c) return;	// Ignorem la primera fila
-			else if(index >= this.grid.numCells - c) return;	// Ignorem la ultima fila
-		}else if(side%2 == 1){		// side 1 i 3 -> laterals
-			if(index % c == 0) return;				// Ignorem la primera columna
-			else if( (index+1) % c == 0) return;	// Ignorem ultima columna
-		}
-
 		switch(side){
-			case 0: cell[index - c].wall[2] = null; break;
-			case 1: cell[index + 1].wall[3] = null; break;
-			case 2: cell[index + c].wall[0] = null; break;
-			case 3: cell[index - 1].wall[1] = null; break;
+			case 0:
+				if(index < cols) return; // Ignorem la primera fila
+				cell[index - cols].wall[2] = null;
+				break;
+			case 1:
+				if( (index+1) % cols == 0) return;	// Ignorem ultima columna
+				cell[index + 1].wall[3] = null;
+				break;
+			case 2:
+				if(index >= this.grid.numCells - cols) return;	// Ignorem la ultima fila
+				cell[index + cols].wall[0] = null;
+				break;
+			case 3:
+				if(index % cols == 0) return;				// Ignorem la primera columna
+				cell[index - 1].wall[1] = null;
+				break;
 		}
 	}
 
@@ -590,6 +817,8 @@ class Controller{
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
 		document.getElementById("option_saveLab").addEventListener('click', this.saveLab.bind(this), false);
 		document.getElementById("option_closeLab").addEventListener('click', this.closeLab.bind(this), false);
+		document.getElementById("option_rotateRight").addEventListener('click', this.rotate.bind(this), false);
+		document.getElementById("option_rotateLeft").addEventListener('click', this.rotate.bind(this), false);
 
 		this.ready_zoomEvents.call(this);
 		
@@ -627,31 +856,6 @@ class Controller{
 	}
 
 	ready_grid(){
-		if(arguments.length == 1){
-			// loadLab
-			var data = arguments[0];
-			if( !this.confirmQuit() ) return;
-			this.model.grid = new Grid(data.header.columns, data.header.rows);
-
-			var cell = this.model.grid.cell;
-			var wall = data.wall;
-			for(var i=0; i<wall.length; i++){
-				for(var side=0; side<4; side++){
-					if(wall[i][side] == 1) new Wall(cell[i], side);
-				}
-			}
-
-		}else if(arguments.length == 2){
-			// newLab
-			if( !this.confirmQuit() ) return;
-			this.model.grid = new Grid(arguments[0], arguments[1]);
-			this.model.loadBorders();
-
-		}else if(arguments.length > 2){
-			console.log("Error: Too much arguments");
-			return;
-		}
-
 		this.changesAreSaved = true;
 		this.view.ready_drawArea(this.model.grid);
 		this.view.draw(this.model);
@@ -660,13 +864,17 @@ class Controller{
 
 	newLab(event){
 		this.view.displayOff("modal_newLab");
+		if( !this.confirmQuit() ) return;
 		var columns = parseInt(event.target[0].value);
 		var rows = parseInt(event.target[1].value);
-		this.ready_grid(columns, rows);
+		this.model.grid = new Grid(columns, rows);
+		this.model.loadBorders();
+		this.ready_grid();
 	}
 
 	loadLab(event){
 		this.view.displayOff("modal_loadLab");
+
 		var files = event.target.files;
 		if (!files[0]) {
 			console.log("File not found");
@@ -674,47 +882,19 @@ class Controller{
 		}else if(files.length > 1){
 			console.log("Too many files");
 		}
-		var reader = new FileReader();
-		reader.readAsText(files[0]);
+		var file = files[0];
+		event.target.value = "";
+		if( !this.confirmQuit() ) return;
 
-		reader.onload = function(){
-			var content = reader.result;
-			
-			//Read file
-			var regexCells = /(?<=Cells\: )(\d*)/gm,
-				regexColumns = /(?<=Columns\: )(\d*)/gm,
-				regexRows = /(?<=Rows\: )(\d*)/gm,
-				regexWalls = /(?<=#\d*: )\d*/gm;
-
-			var resultCells = regexCells.exec(content);
-			if(resultCells == null){
-				console.log("Can't read file");
-				return;
-			}
-
-			var data = {
-				header: {},
-				wall : []
-			};
-			data.header = {
-				cells : resultCells[0],
-				columns : regexColumns.exec(content)[0],
-				rows : regexRows.exec(content)[0]
-			};
-			var search = regexWalls.exec(content);
-			while(search){
-				data.wall.push(search[0]);
-				search = regexWalls.exec(content);
-			}
-
-			if(data.header.cells != data.wall.length){
-				console.log("File corrupted");
-				return;
-			}
-			this.ready_grid(data);
-			event.target.value = "";
-		};
-		reader.onload = reader.onload.bind(this);
+		var splitFilename = file.name.toLowerCase().split(".");
+		var extension = splitFilename[splitFilename.length-1];
+		if(extension == "txt"){
+			this.importTXT(file);
+		}else if(extension == "svg"){
+			this.importSVG(file);
+		}else{
+			console.log("Unsuported File");
+		}
 	}
 
 	saveLab(){
@@ -751,7 +931,42 @@ class Controller{
 	}
 
 	closeLab(){
-		this.ready_grid(0, 0);
+		if( !this.confirmQuit() ) return;
+		this.model.grid = new Grid(0, 0);
+		this.ready_grid()
+	}
+
+	rotate(event){
+		var oldGrid = this.model.grid;
+		var oldCell = oldGrid.cell;
+		var newGrid = new Grid(oldGrid.rows, oldGrid.columns);
+
+		var r;	// r de rotation. Pot valdre 1 o 3
+		var getIndex;
+		if(event.target.id == "option_rotateRight"){
+			r = 1;
+			// formula = (x%col+1)*row-parseInt(x/col)-1
+			getIndex = function(x){ return (x%oldGrid.columns+1)*oldGrid.rows-parseInt(x/oldGrid.columns)-1; }
+		}else if(event.target.id == "option_rotateLeft"){
+			r = 3;
+			// formula = (col-1-x%col)*row+parseInt(x/col);
+			getIndex = function(x){ return (oldGrid.columns-1-x%oldGrid.columns)*oldGrid.rows+parseInt(x/oldGrid.columns); }
+		}
+		
+		var cell = newGrid.cell;
+		var i, s;
+		for(i=0; i<oldCell.length; i++){
+			for(s=0; s<4; s++){
+				if(oldCell[i].wall[s] != null){
+					new Wall(cell[getIndex(i)], (s+r)%4);
+				}
+			}
+		}
+
+		this.model.grid = newGrid;
+		this.view.ready_drawArea(this.model.grid);
+		this.view.draw(this.model); 
+		this.ready_cell_events.call(this);
 	}
 
 	zoom(event){
@@ -769,6 +984,182 @@ class Controller{
 
 			this.ready_grid();
 		}
+	}
+
+	/* IMPORT EXTENSIONS */
+	importTXT(file){
+		var reader = new FileReader();
+		reader.onload = function(){
+			var content = reader.result;
+			
+			//Read file
+			var regexCells = /(?<=Cells\: )(\d*)/gm,
+				regexColumns = /(?<=Columns\: )(\d*)/gm,
+				regexRows = /(?<=Rows\: )(\d*)/gm,
+				regexWalls = /(?<=#\d*: )\d*/gm;
+
+			var resultCells = regexCells.exec(content);
+			if(resultCells == null){
+				console.log("Can't read file");
+				return;
+			}
+
+			var data = {
+				header: {},
+				wall : []
+			};
+			data.header = {
+				cells : resultCells[0],
+				columns : regexColumns.exec(content)[0],
+				rows : regexRows.exec(content)[0]
+			};
+			var search = regexWalls.exec(content);
+			while(search){
+				data.wall.push(search[0]);
+				search = regexWalls.exec(content);
+			}
+
+			if(data.header.cells != data.wall.length){
+				console.log("File corrupted");
+				return;
+			}
+
+			this.model.grid = new Grid(data.header.columns, data.header.rows);
+			var cell = this.model.grid.cell;
+			var wall = data.wall;
+			var i, side;
+			for(i=0; i<wall.length; i++){
+				for(side=0; side<4; side++){
+					if(wall[i][side] == 1) new Wall(cell[i], side);
+				}
+			}
+			this.ready_grid();
+		};
+		reader.onload = reader.onload.bind(this);
+		reader.readAsText(file);
+	}
+
+	importSVG(file){
+		var reader = new FileReader();
+		reader.onload = function(){
+			var content = reader.result;
+			var regexSVG = /<svg([\s\S]*?)\/svg>/gim,
+				regexLines = /<line([\s\S]*?)\/>/gim;
+
+			var resultSVG = content.match(regexSVG);
+			if(resultSVG.length == 0){
+				console.log("Can't read file");
+				return;
+			}
+
+			var resultLines = resultSVG[0].match(regexLines);
+			var walls = [];
+			var i;
+			for(i=0; i<resultLines.length; i++){
+				walls.push( new Segment(resultLines[i]) );
+			}
+			
+			var xMax = 0, yMax = 0;
+			var xMin = walls[0].x1, yMin = walls[0].y2;
+			var x1, x2, y1, y2, svgWall;
+
+			var distNotMultiple = [];
+			var dist = walls[0].getOrtogonalDist();
+			var distMin = dist;
+			
+			// Recorrem walls[Segment1, Segment2, ...]
+			for(i=1; i<walls.length; i++){
+				svgWall = walls[i];
+				x1 = svgWall.x1;
+				x2 = svgWall.x2;
+				y1 = svgWall.y1;
+				y2 = svgWall.y2;
+
+				if(xMin > x1) xMin = x1;
+				if(xMin > x2) xMin = x2;
+				if(yMin > y1) yMin = y1;
+				if(yMin > y2) yMin = y2;
+
+				if(xMax < x1) xMax = x1;
+				if(xMax < x2) xMax = x2;
+				if(yMax < y1) yMax = y1;
+				if(yMax < y2) yMax = y2;
+
+				// Busquem el Segment més curt
+				dist = svgWall.getOrtogonalDist();
+				if (distMin > dist){
+					distMin = dist;
+					var j;
+					for(j=0; j<distNotMultiple.length; j++){
+						dist = distNotMultiple[j];
+						if(dist%distMin == 0) distNotMultiple.splice(j, 1);
+					}
+				}
+				else if(dist%distMin == 0) continue;
+				else if(walls.includes(dist)) continue;
+				else distNotMultiple.push(dist);
+			}
+
+			if(distNotMultiple.length != 0){
+				console.log("Values not working:\n");
+				console.log(distNotMultiple);
+			}
+
+			var columns, rows;
+			if( (xMax-xMin)%distMin == 0 ) columns = (xMax - xMin)/distMin;
+			if( (yMax-yMin)%distMin == 0 ) rows = (yMax - yMin)/distMin;
+
+			var t = 0;	//Aixo es pot esborrar?
+
+			this.model.grid = new Grid(columns, rows);
+
+			var cell = this.model.grid.cell;
+			var x, y, first, last, side, svgWall;
+
+			for(i=0; i<walls.length; i++){
+				svgWall = walls[i];
+				if(svgWall.horitzontal){
+					y = (svgWall.y1 - yMin)/distMin;
+					side = 0;
+
+					first = (svgWall.x1 - xMin)/distMin;
+					last = (svgWall.x2 - xMin)/distMin;
+					if(first > last){
+						var aux = first;
+						first = last;
+						last = aux;
+					}
+					if(rows == y){
+						y--;
+						side = 2;
+					}
+					for(x=first; x<last; x++){
+						new Wall(cell[x+y*columns], side);				
+					}
+				}else if(svgWall.vertical){
+					x = (svgWall.x1 - xMin)/distMin;
+					side = 3;
+
+					first = (svgWall.y1 - yMin)/distMin;
+					last = (svgWall.y2 - yMin)/distMin;
+					if(first > last){
+						var aux = first;
+						first = last;
+						last = aux;
+					}
+					if(columns == x){
+						x--;
+						side = 1;
+					}
+					for(y=first; y<last; y++){
+						new Wall(cell[x+y*columns], side);				
+					}
+				}
+			}
+			this.ready_grid();
+		};
+		reader.onload = reader.onload.bind(this);
+		reader.readAsText(file);
 	}
 
 	/* TOOLBAR EVENTS */
