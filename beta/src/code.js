@@ -1,4 +1,113 @@
 var editor;
+class Vector3{
+	constructor(){
+		this.index;
+		this.x;
+		this.y;
+		this.z;
+
+		var arg = arguments;
+		if(arg.length == 1){
+			this.index = arg[0];
+		}
+		if(arg.length == 3){
+			this.setXYZ(arg[0], arg[1], arg[2]);
+		}
+	}
+
+	setXYZ(x, y, z){
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	toString(){
+		return "v "+this.x +" "+this.y+" "+this.z;
+	}
+}
+
+class ExporterOBJ{
+	constructor(){
+		this.name = "Laberint"
+		this.cell = null;
+		this.poligons = [];
+		this.vertex = [];
+
+		if(arguments.length == 1){	
+			this.cell = arguments[0];
+			this.vertex = [null, null, null, null,
+				null, null, null, null];
+		}
+	}
+
+	fill(model){
+		// Fill Poligons
+		var v = this.vertex;
+
+		var cell = this.cell;
+		var index, indexA, indexB, side;
+
+		//Base
+		for(index=0; index<4; index++){
+			v[index] = new Vector3(index);
+		}
+		this.poligons.push([v[3],v[2],v[1],v[0]]);
+
+		//Laterals
+		for(side=0; side<4; side++){
+			if(cell.wall[side] == null)
+				if(model.getComplementaryWall(cell.index, side) == null)
+					continue;
+			indexA = side;
+			indexB = (indexA+1)%4;
+			if(v[indexA+4] == null) v[indexA+4] = new Vector3(indexA+4);
+			if(v[indexB+4] == null) v[indexB+4] = new Vector3(indexB+4);
+
+			this.poligons.push([v[indexA],v[indexB],v[indexB+4],v[indexA+4]]);
+		}
+
+		// Fill Vertex Coordinates
+		var i;
+		var x, y, z;
+		for(i=0; i<v.length; i++){
+			if(v[i] == null) continue;
+			x = cell.x;
+			y = Math.floor(i/4);
+			z = cell.y;
+			switch(i%4){
+				case 0: break;
+				case 1: x++; break;
+				case 2: x++; z++; break;
+				case 3: z++; break;
+			}
+			v[i].setXYZ(x,y,z);
+		}
+	}
+
+	toString(){
+		var v = this.vertex;
+		var output = "# object "+this.name+"\n\n";
+		var i;
+		for(i=0; i<v.length; i++){
+			if(v[i] == null) continue;
+			output += v[i]+"\n";
+		}
+		output += "# "+v.length+" vertices\n\n";
+
+		output += "o "+this.name+"\n";
+		output += "g "+this.name+"\n";
+		var f;
+		for(i=0; i<this.poligons.length; i++){
+			output += "f ";
+			for(f=0; f<4; f++){
+				output += this.poligons[i][f].index+1+" ";
+			}
+			output += "\n";
+		}
+		output += "# "+this.poligons.length+" polygons\n";
+		return output;
+	}
+}
 
 class Segment {
 	constructor(){
@@ -637,6 +746,23 @@ class Model{
 		cell.wall[side] = null;
 	}
 
+	getComplementaryWall(index, side){
+		var cell = this.grid.cell[index];
+		var x = cell.x, y = cell.y;
+		switch(side){
+			case 0: y--; break;
+			case 1: x++; break;
+			case 2: y++; break;
+			case 3: x--; break;
+		}
+		if( x<0 || y<0 || x>=this.grid.columns || y>=this.grid.rows)
+			return null;
+
+		var newIndex = x + y * this.grid.columns;
+		var newSide = (side+2)%4;
+		return this.grid.cell[newIndex].wall[newSide];
+	}
+
 	loadBorders(){
 		var grid = this.grid;
 		var rows = grid.rows;
@@ -695,10 +821,16 @@ class Model{
 		return directionPath;
 	}
 
+	destroyWall2(index, side){
+		this.grid.cell[index].wall[side] = null;
+		var wall = this.getComplementaryWall(index, side);
+		this.removeWall(wall.cell, wall.side);
+	}
+
 	destroyWall(index, side){
 		var cell = this.grid.cell;
 		var cols = this.grid.columns;
-		cell[index].wall[side] = null;
+		this.removeWall(cell[index], side);
 
 		switch(side){
 			case 0:
@@ -816,7 +948,9 @@ class Controller{
 		document.getElementById("newLab").addEventListener('submit', this.newLab.bind(this), false);
 		document.getElementById("loadLab").addEventListener('change', this.loadLab.bind(this), false);
 		document.getElementById("option_saveLab").addEventListener('click', this.saveLab.bind(this), false);
+		document.getElementById("option_exportLab").addEventListener('click', this.exportLab.bind(this), false);
 		document.getElementById("option_closeLab").addEventListener('click', this.closeLab.bind(this), false);
+
 		document.getElementById("option_rotateRight").addEventListener('click', this.rotate.bind(this), false);
 		document.getElementById("option_rotateLeft").addEventListener('click', this.rotate.bind(this), false);
 
@@ -928,6 +1062,45 @@ class Controller{
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
+	}
+
+	exportLab(){
+		var managerOBJ = new ExporterOBJ();
+		// var poligonManager = [];
+		var model = this.model;
+		var cell = model.grid.cell;
+
+		var vCell, vList, pList;
+		var i, v, p;
+		// Might have a modal with export properties
+
+		for(i=0; i<cell.length; i++){
+			vCell = new ExporterOBJ(cell[i]);
+			vCell.fill(model);
+
+			vList = vCell.vertex;
+			for(v=0; v<vList.length; v++){
+				if(vList[v] == null) continue;
+				managerOBJ.vertex.push(vList[v]);
+			}
+
+			pList = vCell.poligons;
+			for(p=0; p<pList.length; p++){
+				managerOBJ.poligons.push(pList[p]);
+			}
+
+			/* ATENCIO!!! L'INDEX NO SERVEIX PER A RES */
+		}
+
+		// Tornem a indexar els vertex
+		var vertex = managerOBJ.vertex;
+		for(i=0; i<vertex.length; i++){
+			vertex[i].index = i;
+		}
+
+		console.log(""+managerOBJ);
+		// console.log(vertexManager);
+		// console.log(poligonManager);
 	}
 
 	closeLab(){
