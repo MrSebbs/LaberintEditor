@@ -263,6 +263,28 @@ class Toolbar {
 	}
 }
 
+class Properties{
+	constructor(side_length, wall_stroke, margin){
+		this.side_length = side_length;
+		this.wall_stroke = wall_stroke;
+		this.margin = margin;
+	}
+
+	setColors(emptyCellColor, wallFillColor, selectColor, pathColor){
+		this.emptyCellColor = emptyCellColor;
+		this.wallFillColor = wallFillColor;
+		this.selectColor = selectColor;
+		this.pathColor = pathColor;
+	}
+
+	escale(percent){
+		var p = percent;
+		var escalePP = new Properties(this.side_length*p, this.wall_stroke*p, this.margin*p);
+		escalePP.setColors(this.emptyCellColor, this.wallFillColor, this.selectColor, this.pathColor);
+		return escalePP;
+	}
+}
+
 class Wall {
 	constructor(cell, side){
 		this.cell = cell;
@@ -473,23 +495,10 @@ class View{
 		this.DOM_drawArea;
 		this.DOM_grid;
 		this.DOM_walls;
-		this.properties = {
-			'side_length': 50,
-			'margin': 10,
-			'wall_stroke': 3,
-			'original_side_length': 50,
-			'original_margin': 10,
-			'original_wall_stroke': 3,
-			'wallFillColor': "#333",
 
-			'defaultColor': '#fff', 		//'rgb (255, 255, 255)',
-			'selectColor': '#ddd',
-			'pathColor': '#888'
-			// 'clickColor': '#fbb',
-			// 'mousedownColor': '#bfb',
-			// 'mouseupColor': '#bbf',
-
-		};
+		this.defaultPP = new Properties(50, 3, 10);
+		this.defaultPP.setColors("#fff", "#333", "#ddd", "#888");
+		this.properties = this.defaultPP;
 
 		this.longWall;
 		this.ready_modals();
@@ -595,7 +604,7 @@ class View{
 		rect.y.baseVal.value = cell.y * pp.side_length + pp.margin;
 		rect.width.baseVal.value = pp.side_length;
 		rect.height.baseVal.value = pp.side_length;
-		rect.style.fill = pp.defaultColor;
+		rect.style.fill = pp.emptyCellColor;
 		rect.style.stroke = "black";
 		rect.style.strokeOpacity = "0.2";
 	}
@@ -618,7 +627,7 @@ class View{
 
 		// var startColor = new Color3(cellPath[0].element_html.style.fill);
 		var startColor = new Color3(this.properties.pathColor);
-		var targetColor = new Color3(this.properties.defaultColor);
+		var targetColor = new Color3(this.properties.emptyCellColor);
 		var colorVector = targetColor.subtract(startColor);
 
 		var interval;
@@ -1149,12 +1158,8 @@ class Controller{
 			console.log("Enquadra not implemented yet");
 		}else if(event.target.id == "zoom"){
 			percent = event.target[0].value/100;
-			
-			var pp = this.view.properties;
-			pp.side_length = pp.original_side_length * percent;
-			pp.margin = pp.original_margin * percent;
-			pp.wall_stroke = pp.original_wall_stroke * percent;
-
+			var pp = this.view.defaultPP;
+			this.view.properties = pp.escale(percent);
 			this.ready_grid();
 		}
 	}

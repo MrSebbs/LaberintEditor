@@ -35,6 +35,8 @@ D. SCANNER DE LABERINTS
 ARREGLAR EINES EXISTENTS
 ----------------------------------------------------
 
+View properties -> 3D Properties
+
 Reader.onload convertir-ho al meu sistema d'events
 importTXT és molt feo. Arreglar regexs
 
