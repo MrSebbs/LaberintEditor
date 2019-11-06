@@ -80,6 +80,16 @@ class ExporterOBJ{
 				case 2: x++; z++; break;
 				case 3: z++; break;
 			}
+			/* 3D volume walls */
+			/*
+			var wall_stroke = 5;
+			x = x * 100 - wall_stroke;
+			z = z * 100 - wall_stroke;
+			/**/
+			x *= 1000;
+			y *= 800;
+			z *= 1000;
+			
 			v[i].setXYZ(x,y,z);
 		}
 	}
@@ -1076,8 +1086,8 @@ class Controller{
 	exportLab(){
 		var managerOBJ = new ExporterOBJ();
 		// var poligonManager = [];
-		var model = this.model;
-		var cell = model.grid.cell;
+		var grid = this.model.grid;
+		var cell = grid.cell;
 
 		var vCell, vList, pList;
 		var i, v, p;
@@ -1085,7 +1095,7 @@ class Controller{
 
 		for(i=0; i<cell.length; i++){
 			vCell = new ExporterOBJ(cell[i]);
-			vCell.fill(model);
+			vCell.fill(this.model);
 
 			vList = vCell.vertex;
 			for(v=0; v<vList.length; v++){
@@ -1107,9 +1117,14 @@ class Controller{
 			vertex[i].index = i;
 		}
 
-		console.log(""+managerOBJ);
-		// console.log(vertexManager);
-		// console.log(poligonManager);
+		var filename = "Lab_"+ grid.columns +"x"+ grid.rows +".obj";
+		var element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain; charset=utf-8,' + encodeURIComponent(managerOBJ));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
 	}
 
 	closeLab(){
