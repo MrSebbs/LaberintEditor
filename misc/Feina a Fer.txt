@@ -24,6 +24,7 @@ PRIORITATS
 	pont
 	diagonal
 8. Entrada i meta
+9. Implementar draw en una línia gruixuda
 
 A. ALGORITMES DE CERCA
 B. 3D VIEW

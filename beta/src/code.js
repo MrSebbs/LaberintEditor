@@ -715,6 +715,7 @@ class View{
 	draw_old(model){
 		var start = Date.now();
 
+		this.walls_html = [];
 		var code_html = "";		//Hem d'omplir les dades que passarem a innerHTML
 		var cell = model.grid.cell;
 		var wall, i, s;
@@ -735,10 +736,12 @@ class View{
 				if(this.walls_html[4*i + s] == ""){		// Comprobar que no l'haguem pintat abans
 					this.walls_html[4*i + s] = this.getWallCodeHtml(model, wall);
 				}
-				code_html += this.walls_html[4*i + s];
+				code_html += this.walls_html[4*i + s] + "\n";
 			}
 		}
 		this.DOM_walls.innerHTML = code_html;
+
+		console.log(code_html);
 
 		console.log(Date.now() - start);
 	}
@@ -1085,7 +1088,6 @@ class Controller{
 
 	exportLab(){
 		var managerOBJ = new ExporterOBJ();
-		// var poligonManager = [];
 		var grid = this.model.grid;
 		var cell = grid.cell;
 
@@ -1093,22 +1095,23 @@ class Controller{
 		var i, v, p;
 		// Might have a modal with export properties
 
+
 		for(i=0; i<cell.length; i++){
 			vCell = new ExporterOBJ(cell[i]);
 			vCell.fill(this.model);
 
+			// Recorrem tots els vertex de la cela i els afegim a managerOBJ.vertex
 			vList = vCell.vertex;
 			for(v=0; v<vList.length; v++){
 				if(vList[v] == null) continue;
 				managerOBJ.vertex.push(vList[v]);
 			}
 
+			// Recorrem tots els poligons de la cela i els afegim a managerOBJ.poligons			
 			pList = vCell.poligons;
 			for(p=0; p<pList.length; p++){
 				managerOBJ.poligons.push(pList[p]);
 			}
-
-			/* ATENCIO!!! L'INDEX NO SERVEIX PER A RES */
 		}
 
 		// Tornem a indexar els vertex
